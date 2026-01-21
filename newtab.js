@@ -10,8 +10,7 @@ class SpeedDial {
       columns: 6,
       showClock: true,
       showSearch: true,
-      searchEngine: 'google',
-      backgroundColor: '#1a1a2e'
+      searchEngine: 'google'
     };
     this.editingIndex = null;
     this.init();
@@ -29,33 +28,114 @@ class SpeedDial {
   async loadData() {
     return new Promise((resolve) => {
       chrome.storage.sync.get(['dials', 'settings'], (result) => {
-        if (result.dials) {
-          this.dials = result.dials;
-        } else {
-          // 默认快捷方式
-          this.dials = [
-            { name: 'Google', url: 'https://www.google.com', icon: '' },
-            { name: 'YouTube', url: 'https://www.youtube.com', icon: '' },
-            { name: 'GitHub', url: 'https://www.github.com', icon: '' },
-            { name: 'Twitter', url: 'https://www.twitter.com', icon: '' }
-          ];
+        if (chrome.runtime.lastError) {
+          console.error('加载同步数据失败:', chrome.runtime.lastError.message);
+          // 尝试从本地存储加载
+          chrome.storage.local.get(['dials', 'settings'], (localResult) => {
+            this.loadFromResult(localResult);
+            resolve();
+          });
+          return;
         }
-        if (result.settings) {
-          this.settings = { ...this.settings, ...result.settings };
+        this.loadFromResult(result);
+        resolve();
+      });
+    });
+  }
+
+  // 从结果加载数据
+  loadFromResult(result) {
+    if (result.dials) {
+      this.dials = result.dials;
+    } else {
+      // 默认快捷方式
+      this.dials = [
+        { name: 'Google', url: 'https://www.google.com', icon: '' },
+        { name: 'YouTube', url: 'https://www.youtube.com', icon: '' },
+        { name: 'GitHub', url: 'https://www.github.com', icon: '' },
+        { name: 'Twitter', url: 'https://www.twitter.com', icon: '' }
+      ];
+    }
+    if (result.settings) {
+      this.settings = { ...this.settings, ...result.settings };
+    }
+  }
+
+  // 保存数据
+  async saveData() {
+    const data = {
+      dials: this.dials,
+      settings: this.settings
+    };
+
+    // 检查数据大小
+    const dataSize = new Blob([JSON.stringify(data)]).size;
+    const SYNC_QUOTA_BYTES = 102400; // 100KB
+    const SYNC_QUOTA_BYTES_PER_ITEM = 8192; // 8KB
+
+    // 检查单项大小
+    const dialsSize = new Blob([JSON.stringify(this.dials)]).size;
+    if (dialsSize > SYNC_QUOTA_BYTES_PER_ITEM) {
+      console.warn(`快捷方式数据 (${(dialsSize/1024).toFixed(1)}KB) 超出同步限制 (8KB)，将仅保存到本地`);
+      this.showSyncWarning('数据过大，仅保存到本地。请减少快捷方式数量或简化 SVG 图标。');
+      return this.saveToLocalOnly(data);
+    }
+
+    return new Promise((resolve) => {
+      chrome.storage.sync.set(data, () => {
+        if (chrome.runtime.lastError) {
+          console.error('同步保存失败:', chrome.runtime.lastError.message);
+          this.showSyncWarning('同步失败: ' + chrome.runtime.lastError.message);
+          // 回退到本地存储
+          this.saveToLocalOnly(data).then(resolve);
+        } else {
+          // 同时保存到本地作为备份
+          chrome.storage.local.set(data, () => {
+            console.log('数据已同步保存');
+            resolve();
+          });
+        }
+      });
+    });
+  }
+
+  // 仅保存到本地存储
+  async saveToLocalOnly(data) {
+    return new Promise((resolve) => {
+      chrome.storage.local.set(data, () => {
+        if (chrome.runtime.lastError) {
+          console.error('本地保存也失败:', chrome.runtime.lastError.message);
         }
         resolve();
       });
     });
   }
 
-  // 保存数据
-  async saveData() {
-    return new Promise((resolve) => {
-      chrome.storage.sync.set({
-        dials: this.dials,
-        settings: this.settings
-      }, resolve);
-    });
+  // 显示同步警告
+  showSyncWarning(message) {
+    // 检查是否已存在警告元素
+    let warning = document.getElementById('syncWarning');
+    if (!warning) {
+      warning = document.createElement('div');
+      warning.id = 'syncWarning';
+      warning.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #ff6b6b;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-size: 14px;
+        z-index: 10000;
+        max-width: 300px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        animation: slideIn 0.3s ease;
+      `;
+      document.body.appendChild(warning);
+    }
+    warning.textContent = message;
+    setTimeout(() => warning.remove(), 5000);
   }
 
   // 渲染快捷方式
@@ -112,12 +192,11 @@ class SpeedDial {
   // 获取图标 HTML
   getIconHtml(dial) {
     if (dial.icon) {
-      // 如果是 SVG 代码
+      // 只支持 SVG 代码
       if (dial.icon.trim().startsWith('<svg')) {
         return dial.icon;
       }
-      // 如果是 URL
-      return `<img src="${this.escapeHtml(dial.icon)}" alt="${this.escapeHtml(dial.name)}">`;
+      // 非 SVG 格式，忽略并使用默认
     }
 
     // 使用 Google Favicon 服务
@@ -133,12 +212,7 @@ class SpeedDial {
   // 获取字母图标
   getLetterIcon(name) {
     const letter = name.charAt(0).toUpperCase();
-    const colors = [
-      '#667eea', '#764ba2', '#f093fb', '#f5576c',
-      '#4facfe', '#00f2fe', '#43e97b', '#38f9d7',
-      '#fa709a', '#fee140', '#a8edea', '#fed6e3'
-    ];
-    const color = colors[letter.charCodeAt(0) % colors.length];
+    const color = '#9ba3af'; // 统一的浅蓝灰色
     return `<div class="letter-icon" style="background: ${color}">${letter}</div>`;
   }
 
@@ -259,11 +333,21 @@ class SpeedDial {
   async saveDial() {
     const name = document.getElementById('dialName').value.trim();
     let url = document.getElementById('dialUrl').value.trim();
-    const icon = document.getElementById('dialIcon').value.trim();
+    const iconInput = document.getElementById('dialIcon').value.trim();
 
     if (!name || !url) {
       alert('请填写名称和网址');
       return;
+    }
+
+    // 验证图标格式：只允许 SVG 或空
+    let icon = '';
+    if (iconInput) {
+      if (!this.isValidSvg(iconInput)) {
+        alert('图标格式无效！只支持 SVG 代码。\n\n请粘贴以 <svg 开头的 SVG 代码，或留空使用默认图标。');
+        return;
+      }
+      icon = iconInput;
     }
 
     // 自动补全 URL
@@ -282,6 +366,21 @@ class SpeedDial {
     await this.saveData();
     this.renderDials();
     this.closeModal();
+  }
+
+  // 验证是否为有效的 SVG
+  isValidSvg(str) {
+    const trimmed = str.trim();
+    // 必须以 <svg 开头，以 </svg> 结尾
+    if (!trimmed.startsWith('<svg') || !trimmed.endsWith('</svg>')) {
+      return false;
+    }
+    // 基本的 XSS 防护：不允许 script 标签和事件处理器
+    const dangerous = /<script|on\w+\s*=/i;
+    if (dangerous.test(trimmed)) {
+      return false;
+    }
+    return true;
   }
 
   // 删除快捷方式

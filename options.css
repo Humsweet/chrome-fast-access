@@ -5,14 +5,13 @@
 }
 
 :root {
-  --bg-color: #0f0f1a;
-  --card-bg: #1a1a2e;
-  --text-color: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.7);
-  --accent-color: #667eea;
-  --accent-hover: #764ba2;
-  --border-color: rgba(255, 255, 255, 0.1);
-  --danger-color: #e74c3c;
+  --bg-color: #fbfbfa;
+  --card-bg: #ffffff;
+  --text-color: #37352f;
+  --text-secondary: #6b6b6b;
+  --accent-color: #2383e2;
+  --border-color: rgba(55, 53, 47, 0.09);
+  --danger-color: #e03e3e;
 }
 
 body {
@@ -48,17 +47,21 @@ header h1 {
 /* 设置区块 */
 .settings-section {
   background: var(--card-bg);
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 24px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border-color);
 }
 
 .settings-section h2 {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   margin-bottom: 20px;
   padding-bottom: 12px;
   border-bottom: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .setting-item {
@@ -88,7 +91,7 @@ select {
   font-size: 14px;
   border: 1px solid var(--border-color);
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.05);
+  background: #ffffff;
   color: var(--text-color);
   cursor: pointer;
   min-width: 120px;
@@ -97,25 +100,7 @@ select {
 select:focus {
   outline: none;
   border-color: var(--accent-color);
-}
-
-/* 颜色选择器 */
-input[type="color"] {
-  width: 50px;
-  height: 35px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  background: transparent;
-}
-
-input[type="color"]::-webkit-color-swatch-wrapper {
-  padding: 2px;
-}
-
-input[type="color"]::-webkit-color-swatch {
-  border: none;
-  border-radius: 4px;
+  box-shadow: 0 0 0 3px rgba(35, 131, 226, 0.1);
 }
 
 /* 文本输入框 */
@@ -125,7 +110,7 @@ input[type="text"] {
   font-size: 14px;
   border: 1px solid var(--border-color);
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.05);
+  background: #ffffff;
   color: var(--text-color);
   width: 250px;
 }
@@ -134,6 +119,7 @@ input[type="url"]:focus,
 input[type="text"]:focus {
   outline: none;
   border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(35, 131, 226, 0.1);
 }
 
 /* 开关 */
@@ -157,8 +143,8 @@ input[type="text"]:focus {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(255, 255, 255, 0.1);
-  transition: 0.3s;
+  background-color: rgba(55, 53, 47, 0.16);
+  transition: 0.2s;
   border-radius: 26px;
 }
 
@@ -170,12 +156,13 @@ input[type="text"]:focus {
   left: 3px;
   bottom: 3px;
   background-color: white;
-  transition: 0.3s;
+  transition: 0.2s;
   border-radius: 50%;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 input:checked + .slider {
-  background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
+  background: var(--accent-color);
 }
 
 input:checked + .slider:before {
@@ -197,22 +184,22 @@ input:checked + .slider:before {
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(55, 53, 47, 0.04);
   color: var(--text-color);
+  border: 1px solid var(--border-color);
 }
 
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(55, 53, 47, 0.08);
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
+  background: var(--accent-color);
   color: white;
 }
 
 .btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  background: #1a73d1;
 }
 
 .btn-danger {
@@ -244,8 +231,8 @@ input:checked + .slider:before {
   gap: 8px;
   margin-top: 16px;
   padding: 12px;
-  background: rgba(102, 126, 234, 0.1);
-  border-radius: 8px;
+  background: rgba(35, 131, 226, 0.08);
+  border-radius: 6px;
   color: var(--accent-color);
 }
 
@@ -262,10 +249,50 @@ footer {
   color: #27ae60;
   opacity: 0;
   transition: opacity 0.3s;
+  padding: 6px 12px;
+  border-radius: 4px;
 }
 
 .save-status.show {
   opacity: 1;
+}
+
+/* 同步状态 */
+.sync-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sync-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  font-size: 14px;
+}
+
+.sync-item span:first-child {
+  color: var(--text-secondary);
+}
+
+.sync-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(35, 131, 226, 0.08);
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-top: 8px;
+}
+
+.sync-tip svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--accent-color);
 }
 
 /* 响应式 */

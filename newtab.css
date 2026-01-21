@@ -5,21 +5,20 @@
 }
 
 :root {
-  --bg-color: #1a1a2e;
-  --bg-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-  --card-bg: rgba(255, 255, 255, 0.1);
-  --card-hover-bg: rgba(255, 255, 255, 0.15);
-  --text-color: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.7);
-  --accent-color: #667eea;
-  --accent-hover: #764ba2;
-  --border-radius: 12px;
-  --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --bg-color: #fbfbfa;
+  --card-bg: rgba(55, 53, 47, 0.04);
+  --card-hover-bg: rgba(55, 53, 47, 0.08);
+  --text-color: #37352f;
+  --text-secondary: #6b6b6b;
+  --accent-color: #2383e2;
+  --border-color: rgba(55, 53, 47, 0.09);
+  --border-radius: 8px;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 body {
   min-height: 100vh;
-  background: var(--bg-gradient);
+  background: var(--bg-color);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
   color: var(--text-color);
   overflow-x: hidden;
@@ -62,12 +61,11 @@ body {
   width: 100%;
   padding: 16px 20px 16px 50px;
   font-size: 16px;
-  border: none;
-  border-radius: 24px;
-  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: #ffffff;
   color: var(--text-color);
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 #searchInput::placeholder {
@@ -76,8 +74,8 @@ body {
 
 #searchInput:focus {
   outline: none;
-  background: var(--card-hover-bg);
-  box-shadow: 0 0 0 2px var(--accent-color);
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(35, 131, 226, 0.1);
 }
 
 /* 时间显示 */
@@ -88,9 +86,9 @@ body {
 
 .clock {
   font-size: 72px;
-  font-weight: 200;
+  font-weight: 300;
   letter-spacing: 2px;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  color: var(--text-color);
 }
 
 .date {
@@ -122,17 +120,14 @@ body {
   background: var(--card-bg);
   border-radius: var(--border-radius);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   text-decoration: none;
   color: var(--text-color);
-  backdrop-filter: blur(10px);
   position: relative;
 }
 
 .dial-item:hover {
   background: var(--card-hover-bg);
-  transform: translateY(-4px);
-  box-shadow: var(--shadow);
 }
 
 .dial-icon {
@@ -177,13 +172,13 @@ body {
 
 /* 添加按钮 */
 .dial-add {
-  border: 2px dashed rgba(255, 255, 255, 0.3);
+  border: 1px dashed rgba(55, 53, 47, 0.2);
   background: transparent;
 }
 
 .dial-add:hover {
   border-color: var(--accent-color);
-  background: rgba(102, 126, 234, 0.1);
+  background: rgba(35, 131, 226, 0.04);
 }
 
 .dial-add .add-icon {
@@ -198,12 +193,11 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(15, 15, 15, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  backdrop-filter: blur(5px);
 }
 
 .modal.hidden {
@@ -211,12 +205,12 @@ body {
 }
 
 .modal-content {
-  background: #1e1e2e;
+  background: #ffffff;
   border-radius: var(--border-radius);
   width: 90%;
   max-width: 420px;
-  box-shadow: var(--shadow);
-  animation: modalIn 0.3s ease;
+  box-shadow: 0 0 0 1px rgba(15, 15, 15, 0.05), 0 3px 6px rgba(15, 15, 15, 0.1), 0 9px 24px rgba(15, 15, 15, 0.2);
+  animation: modalIn 0.2s ease;
 }
 
 @keyframes modalIn {
@@ -235,7 +229,7 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 20px 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .modal-header h3 {
@@ -282,9 +276,9 @@ body {
   width: 100%;
   padding: 12px 16px;
   font-size: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: #ffffff;
   color: var(--text-color);
   transition: all 0.2s;
 }
@@ -293,7 +287,7 @@ body {
 .form-group textarea:focus {
   outline: none;
   border-color: var(--accent-color);
-  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(35, 131, 226, 0.1);
 }
 
 .form-group textarea {
@@ -302,49 +296,64 @@ body {
   font-family: monospace;
 }
 
+.form-hint {
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.form-hint a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+.form-hint a:hover {
+  text-decoration: underline;
+}
+
 .modal-footer {
   padding: 16px 24px;
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--border-color);
 }
 
 .btn {
   padding: 10px 20px;
   font-size: 14px;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
   font-weight: 500;
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--card-bg);
   color: var(--text-color);
 }
 
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--card-hover-bg);
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
+  background: var(--accent-color);
   color: white;
 }
 
 .btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  background: #1a73d1;
 }
 
 /* 右键菜单 */
 .context-menu {
   position: fixed;
-  background: #1e1e2e;
-  border-radius: 8px;
-  box-shadow: var(--shadow);
+  background: #ffffff;
+  border-radius: 6px;
+  box-shadow: 0 0 0 1px rgba(15, 15, 15, 0.05), 0 3px 6px rgba(15, 15, 15, 0.1), 0 9px 24px rgba(15, 15, 15, 0.2);
   min-width: 150px;
   z-index: 1001;
   overflow: hidden;
@@ -360,12 +369,13 @@ body {
   gap: 10px;
   padding: 12px 16px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.1s;
   font-size: 14px;
+  color: var(--text-color);
 }
 
 .context-menu-item:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--card-hover-bg);
 }
 
 .context-menu-item svg {
@@ -382,27 +392,25 @@ body {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: var(--card-bg);
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  background: transparent;
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .settings-btn:hover {
   background: var(--card-hover-bg);
-  transform: rotate(45deg);
 }
 
 .settings-btn svg {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   color: var(--text-secondary);
 }
 
@@ -450,11 +458,10 @@ body {
 /* 拖拽相关样式 */
 .dial-item.dragging {
   opacity: 0.5;
-  transform: scale(1.05);
 }
 
 .dial-item.drag-over {
-  border: 2px solid var(--accent-color);
+  background: rgba(35, 131, 226, 0.08);
 }
 
 /* 删除确认 */
