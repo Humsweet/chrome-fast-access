@@ -1,30 +1,13 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>新标签页</title>
+  <title data-i18n="newTab">New Tab</title>
   <link rel="stylesheet" href="newtab.css">
 </head>
 <body>
   <div class="container">
-    <!-- 搜索栏 -->
-    <div class="search-container">
-      <div class="search-box">
-        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8"></circle>
-          <path d="M21 21l-4.35-4.35"></path>
-        </svg>
-        <input type="text" id="searchInput" placeholder="在 Google 上搜索，或输入网址" autocomplete="off">
-      </div>
-    </div>
-
-    <!-- 时间显示 -->
-    <div class="time-container">
-      <div id="clock" class="clock"></div>
-      <div id="date" class="date"></div>
-    </div>
-
     <!-- 快捷方式网格 -->
     <div class="dials-container">
       <div id="dialsGrid" class="dials-grid">
@@ -36,27 +19,27 @@
     <div id="modal" class="modal hidden">
       <div class="modal-content">
         <div class="modal-header">
-          <h3 id="modalTitle">添加快捷方式</h3>
+          <h3 id="modalTitle" data-i18n="addShortcut">Add Shortcut</h3>
           <button id="modalClose" class="modal-close">&times;</button>
         </div>
         <div class="modal-body">
           <div class="form-group">
-            <label for="dialName">名称</label>
-            <input type="text" id="dialName" placeholder="例如：Google">
+            <label for="dialName" data-i18n="name">Name</label>
+            <input type="text" id="dialName" data-i18n-placeholder="namePlaceholder" placeholder="e.g., Google">
           </div>
           <div class="form-group">
-            <label for="dialUrl">网址</label>
-            <input type="url" id="dialUrl" placeholder="https://www.google.com">
+            <label for="dialUrl" data-i18n="url">URL</label>
+            <input type="url" id="dialUrl" data-i18n-placeholder="urlPlaceholder" placeholder="https://www.google.com">
           </div>
           <div class="form-group">
-            <label for="dialIcon">图标 (可选，仅支持 SVG 代码)</label>
-            <textarea id="dialIcon" placeholder="粘贴 SVG 代码，留空将自动获取网站图标"></textarea>
-            <small class="form-hint">提示：可从 <a href="https://simpleicons.org/" target="_blank">Simple Icons</a> 获取品牌 SVG 图标</small>
+            <label for="dialIcon" data-i18n="iconLabel">Icon (Optional, SVG code only)</label>
+            <textarea id="dialIcon" data-i18n-placeholder="iconPlaceholder" placeholder="Paste SVG code, leave empty to use default icon"></textarea>
+            <small class="form-hint"><span data-i18n="iconHint">Tip: Get brand SVG icons from</span> <a href="https://simpleicons.org/" target="_blank">Simple Icons</a></small>
           </div>
         </div>
         <div class="modal-footer">
-          <button id="modalCancel" class="btn btn-secondary">取消</button>
-          <button id="modalSave" class="btn btn-primary">保存</button>
+          <button id="modalCancel" class="btn btn-secondary" data-i18n="cancel">Cancel</button>
+          <button id="modalSave" class="btn btn-primary" data-i18n="save">Save</button>
         </div>
       </div>
     </div>
@@ -68,19 +51,19 @@
           <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
           <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
         </svg>
-        编辑
+        <span data-i18n="edit">Edit</span>
       </div>
       <div class="context-menu-item" data-action="delete">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="3 6 5 6 21 6"></polyline>
           <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
         </svg>
-        删除
+        <span data-i18n="delete">Delete</span>
       </div>
     </div>
 
     <!-- 设置按钮 -->
-    <button id="settingsBtn" class="settings-btn" title="设置">
+    <button id="settingsBtn" class="settings-btn" data-i18n-title="settings" title="Settings">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <circle cx="12" cy="12" r="3"></circle>
         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
@@ -88,6 +71,7 @@
     </button>
   </div>
 
+  <script src="i18n.js"></script>
   <script src="newtab.js"></script>
 </body>
 </html>

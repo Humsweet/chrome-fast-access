@@ -1,23 +1,24 @@
 {
   "manifest_version": 3,
-  "name": "My Speed Dial",
-  "version": "1.0.0",
-  "description": "简洁高效的新标签页快速拨号",
+  "name": "__MSG_appName__",
+  "version": "1.2.0",
+  "description": "__MSG_appDescription__",
+  "default_locale": "en",
   "permissions": ["storage", "topSites", "favicon"],
   "chrome_url_overrides": {
     "newtab": "newtab.html"
   },
   "icons": {
-    "16": "icons/icon16.svg",
-    "48": "icons/icon48.svg",
-    "128": "icons/icon128.svg"
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
   },
   "options_page": "options.html",
   "action": {
     "default_icon": {
-      "16": "icons/icon16.svg",
-      "48": "icons/icon48.svg"
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png"
     },
-    "default_title": "My Speed Dial 设置"
+    "default_title": "My Speed Dial Settings"
   }
 }

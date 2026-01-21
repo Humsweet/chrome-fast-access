@@ -5,19 +5,30 @@
 class OptionsPage {
   constructor() {
     this.settings = {
-      searchEngine: 'google',
-      showClock: true,
-      showSearch: true,
-      columns: 6
+      columns: 6,
+      language: 'zh-CN'
     };
     this.init();
   }
 
   async init() {
+    await i18n.init();
     await this.loadSettings();
+    this.applyI18n();
     this.populateForm();
     this.setupEventListeners();
     this.checkSyncStatus();
+  }
+
+  // 应用国际化
+  applyI18n() {
+    // 更新所有带 data-i18n 属性的元素
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      el.textContent = i18n.t(key);
+    });
+    // 更新页面标题
+    document.title = i18n.t('settingsTitle');
   }
 
   // 加载设置
@@ -49,7 +60,7 @@ class OptionsPage {
       chrome.storage.sync.set({ settings: this.settings }, () => {
         if (chrome.runtime.lastError) {
           console.error('同步保存失败:', chrome.runtime.lastError.message);
-          this.showSaveStatus('同步失败: ' + chrome.runtime.lastError.message, true);
+          this.showSaveStatus(i18n.t('syncFailed') + chrome.runtime.lastError.message, true);
           // 保存到本地作为备份
           chrome.storage.local.set({ settings: this.settings }, resolve);
         } else {
@@ -64,31 +75,27 @@ class OptionsPage {
 
   // 填充表单
   populateForm() {
-    document.getElementById('searchEngine').value = this.settings.searchEngine;
-    document.getElementById('showClock').checked = this.settings.showClock;
-    document.getElementById('showSearch').checked = this.settings.showSearch;
     document.getElementById('columns').value = this.settings.columns;
+    document.getElementById('language').value = this.settings.language || i18n.getLanguage();
   }
 
   // 从表单获取设置
   getFormValues() {
     return {
-      searchEngine: document.getElementById('searchEngine').value,
-      showClock: document.getElementById('showClock').checked,
-      showSearch: document.getElementById('showSearch').checked,
-      columns: parseInt(document.getElementById('columns').value)
+      columns: parseInt(document.getElementById('columns').value),
+      language: document.getElementById('language').value
     };
   }
 
   // 显示保存状态
-  showSaveStatus(message = '设置已保存', isError = false) {
+  showSaveStatus(message, isError = false) {
     const status = document.getElementById('saveStatus');
     status.textContent = message;
     status.style.background = isError ? '#ff6b6b' : '#4CAF50';
     status.classList.add('show');
     setTimeout(() => {
       status.classList.remove('show');
-    }, isError ? 5000 : 2000);
+    }, isError ? 5000 : 3000);
   }
 
   // 设置事件监听
@@ -97,7 +104,16 @@ class OptionsPage {
     document.getElementById('saveBtn').addEventListener('click', async () => {
       this.settings = this.getFormValues();
       await this.saveSettings();
-      this.showSaveStatus();
+      // 应用新语言
+      i18n.setLanguage(this.settings.language);
+      this.applyI18n();
+      this.showSaveStatus(i18n.t('settingsSaved'));
+    });
+
+    // 语言选择变化时实时预览
+    document.getElementById('language').addEventListener('change', (e) => {
+      i18n.setLanguage(e.target.value);
+      this.applyI18n();
     });
 
     // 导出配置
@@ -142,7 +158,7 @@ class OptionsPage {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    this.showSaveStatus('配置已导出');
+    this.showSaveStatus(i18n.t('configExported'));
   }
 
   // 导入数据
@@ -157,7 +173,7 @@ class OptionsPage {
         // 检查数据大小
         const dataSize = new Blob([JSON.stringify(data)]).size;
         if (dataSize > 102400) {
-          alert('导入的数据过大（超过100KB），可能无法完全同步到其他设备。请减少快捷方式数量或简化 SVG 图标。');
+          alert(i18n.t('importDataTooLarge'));
         }
 
         await new Promise((resolve, reject) => {
@@ -165,7 +181,7 @@ class OptionsPage {
             if (chrome.runtime.lastError) {
               // 同步失败，尝试保存到本地
               chrome.storage.local.set(data, () => {
-                this.showSaveStatus('同步失败，已保存到本地', true);
+                this.showSaveStatus(i18n.t('savedToLocal'), true);
                 resolve();
               });
             } else {
@@ -178,11 +194,16 @@ class OptionsPage {
         if (data.settings) {
           this.settings = data.settings;
           this.populateForm();
+          // 应用导入的语言设置
+          if (data.settings.language) {
+            i18n.setLanguage(data.settings.language);
+            this.applyI18n();
+          }
         }
 
-        this.showSaveStatus('配置已导入');
+        this.showSaveStatus(i18n.t('configImported'));
       } catch (err) {
-        alert('导入失败：无效的配置文件');
+        alert(i18n.t('importFailed'));
         console.error('Import error:', err);
       }
     };
@@ -191,7 +212,7 @@ class OptionsPage {
 
   // 重置数据
   async resetData() {
-    if (confirm('确定要重置所有数据吗？这将删除所有快捷方式和设置。')) {
+    if (confirm(i18n.t('confirmReset'))) {
       await new Promise((resolve) => {
         chrome.storage.sync.clear(resolve);
       });
@@ -201,14 +222,12 @@ class OptionsPage {
 
       // 重置为默认设置
       this.settings = {
-        searchEngine: 'google',
-        showClock: true,
-        showSearch: true,
-        columns: 6
+        columns: 6,
+        language: 'zh-CN'
       };
 
       this.populateForm();
-      this.showSaveStatus('数据已重置');
+      this.showSaveStatus(i18n.t('dataReset'));
       this.checkSyncStatus();
     }
   }
@@ -222,7 +241,7 @@ class OptionsPage {
     chrome.storage.sync.getBytesInUse(null, (syncBytes) => {
       const syncUsageEl = document.getElementById('syncUsage');
       if (chrome.runtime.lastError) {
-        syncUsageEl.textContent = '获取失败';
+        syncUsageEl.textContent = i18n.t('getFailed');
         syncUsageEl.style.color = '#ff6b6b';
       } else {
         const percentage = ((syncBytes / SYNC_QUOTA_BYTES) * 100).toFixed(1);
@@ -235,7 +254,7 @@ class OptionsPage {
     chrome.storage.local.getBytesInUse(null, (localBytes) => {
       const localUsageEl = document.getElementById('localUsage');
       if (chrome.runtime.lastError) {
-        localUsageEl.textContent = '获取失败';
+        localUsageEl.textContent = i18n.t('getFailed');
       } else {
         localUsageEl.textContent = `${(localBytes / 1024).toFixed(2)} KB`;
       }
@@ -254,20 +273,20 @@ class OptionsPage {
 
     const statusEl = document.getElementById('syncStatusText');
     if (syncData === null) {
-      statusEl.textContent = '❌ 同步存储访问失败';
+      statusEl.textContent = `❌ ${i18n.t('syncAccessFailed')}`;
       statusEl.style.color = '#ff6b6b';
     } else if (syncData.dials) {
       // 检查 dials 数据大小
       const dialsSize = new Blob([JSON.stringify(syncData.dials)]).size;
       if (dialsSize > SYNC_QUOTA_BYTES_PER_ITEM) {
-        statusEl.textContent = `⚠️ 快捷方式数据过大 (${(dialsSize/1024).toFixed(1)}KB > 8KB)，无法同步`;
+        statusEl.textContent = `⚠️ ${i18n.t('dataTooLarge')} (${(dialsSize/1024).toFixed(1)}KB > 8KB), ${i18n.t('cannotSync')}`;
         statusEl.style.color = '#ff9800';
       } else {
-        statusEl.textContent = `✅ 正常 (${syncData.dials.length} 个快捷方式已同步)`;
+        statusEl.textContent = `✅ ${i18n.t('syncNormal')} (${syncData.dials.length} ${i18n.t('shortcutsSynced')})`;
         statusEl.style.color = '#4CAF50';
       }
     } else {
-      statusEl.textContent = '⚠️ 无同步数据，使用默认配置';
+      statusEl.textContent = `⚠️ ${i18n.t('noSyncData')}`;
       statusEl.style.color = '#ff9800';
     }
   }

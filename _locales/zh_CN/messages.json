@@ -1,0 +1,10 @@
+{
+  "appName": {
+    "message": "My Speed Dial",
+    "description": "扩展名称"
+  },
+  "appDescription": {
+    "message": "简洁高效的新标签页快速拨号扩展。自定义快捷方式，享受极简浏览体验。",
+    "description": "扩展描述"
+  }
+}

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Speed Dial 设置</title>
+  <title>My Speed Dial Settings</title>
   <link rel="stylesheet" href="options.css">
 </head>
 <body>
@@ -17,56 +17,43 @@
           <rect x="6" y="26" width="16" height="16" rx="3" fill="white" opacity="0.7"/>
           <rect x="26" y="26" width="16" height="16" rx="3" fill="white" opacity="0.5"/>
         </svg>
-        My Speed Dial 设置
+        <span data-i18n="settingsTitle">My Speed Dial Settings</span>
       </h1>
     </header>
 
     <main>
-      <!-- 搜索引擎设置 -->
+      <!-- 显示设置 -->
       <section class="settings-section">
-        <h2>搜索设置</h2>
+        <h2 data-i18n="displaySettings">Display Settings</h2>
         <div class="setting-item">
-          <label for="searchEngine">默认搜索引擎</label>
-          <select id="searchEngine">
-            <option value="google">Google</option>
-            <option value="bing">Bing</option>
-            <option value="baidu">百度</option>
-            <option value="duckduckgo">DuckDuckGo</option>
+          <label for="columns" data-i18n="columnsPerRow">Items per row</label>
+          <select id="columns">
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6" selected>6</option>
+            <option value="8">8</option>
           </select>
         </div>
       </section>
 
-      <!-- 显示设置 -->
+      <!-- 语言设置 -->
       <section class="settings-section">
-        <h2>显示设置</h2>
+        <h2 data-i18n="languageSettings">Language</h2>
         <div class="setting-item">
-          <label for="showClock">显示时钟</label>
-          <label class="switch">
-            <input type="checkbox" id="showClock" checked>
-            <span class="slider"></span>
-          </label>
-        </div>
-        <div class="setting-item">
-          <label for="showSearch">显示搜索栏</label>
-          <label class="switch">
-            <input type="checkbox" id="showSearch" checked>
-            <span class="slider"></span>
-          </label>
-        </div>
-        <div class="setting-item">
-          <label for="columns">每行显示数量</label>
-          <select id="columns">
-            <option value="4">4 个</option>
-            <option value="5">5 个</option>
-            <option value="6" selected>6 个</option>
-            <option value="8">8 个</option>
+          <label for="language" data-i18n="language">Language</label>
+          <select id="language">
+            <option value="en">English</option>
+            <option value="zh-CN">简体中文</option>
+            <option value="zh-TW">繁體中文</option>
+            <option value="ja">日本語</option>
+            <option value="es">Español</option>
           </select>
         </div>
       </section>
 
       <!-- 数据管理 -->
       <section class="settings-section">
-        <h2>数据管理</h2>
+        <h2 data-i18n="dataManagement">Data Management</h2>
         <div class="setting-item buttons">
           <button id="exportBtn" class="btn btn-secondary">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
@@ -74,7 +61,7 @@
               <polyline points="7 10 12 15 17 10"></polyline>
               <line x1="12" y1="15" x2="12" y2="3"></line>
             </svg>
-            导出配置
+            <span data-i18n="exportConfig">Export</span>
           </button>
           <button id="importBtn" class="btn btn-secondary">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
@@ -82,7 +69,7 @@
               <polyline points="17 8 12 3 7 8"></polyline>
               <line x1="12" y1="3" x2="12" y2="15"></line>
             </svg>
-            导入配置
+            <span data-i18n="importConfig">Import</span>
           </button>
           <input type="file" id="importFile" accept=".json" hidden>
         </div>
@@ -92,26 +79,26 @@
               <polyline points="3 6 5 6 21 6"></polyline>
               <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
             </svg>
-            重置所有数据
+            <span data-i18n="resetAll">Reset All</span>
           </button>
         </div>
       </section>
 
       <!-- 同步状态 -->
       <section class="settings-section">
-        <h2>同步状态</h2>
+        <h2 data-i18n="syncStatus">Sync Status</h2>
         <div class="sync-info" id="syncInfo">
           <div class="sync-item">
-            <span>同步存储使用量:</span>
-            <span id="syncUsage">检测中...</span>
+            <span data-i18n="syncUsage">Sync storage usage:</span>
+            <span id="syncUsage" data-i18n="checking">Checking...</span>
           </div>
           <div class="sync-item">
-            <span>本地存储使用量:</span>
-            <span id="localUsage">检测中...</span>
+            <span data-i18n="localUsage">Local storage usage:</span>
+            <span id="localUsage" data-i18n="checking">Checking...</span>
           </div>
           <div class="sync-item">
-            <span>同步状态:</span>
-            <span id="syncStatusText">检测中...</span>
+            <span data-i18n="syncState">Sync status:</span>
+            <span id="syncStatusText" data-i18n="checking">Checking...</span>
           </div>
           <p class="sync-tip">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
@@ -119,7 +106,7 @@
               <line x1="12" y1="16" x2="12" y2="12"></line>
               <line x1="12" y1="8" x2="12.01" y2="8"></line>
             </svg>
-            提示: Chrome 同步存储限制为 100KB，单项最大 8KB。图标仅支持 SVG 格式以确保同步正常工作。
+            <span data-i18n="syncTip">Tip: Chrome sync storage limit is 100KB, max 8KB per item. Only SVG icons are supported for sync.</span>
           </p>
           <button id="checkSyncBtn" class="btn btn-secondary">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
@@ -128,27 +115,41 @@
               <path d="M3 22v-6h6"></path>
               <path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path>
             </svg>
-            检查同步状态
+            <span data-i18n="checkSync">Check Sync</span>
           </button>
         </div>
       </section>
 
       <!-- 关于 -->
       <section class="settings-section">
-        <h2>关于</h2>
+        <h2 data-i18n="about">About</h2>
         <div class="about-info">
-          <p><strong>My Speed Dial</strong> v1.0.0</p>
-          <p>简洁高效的新标签页快速拨号扩展</p>
+          <p><strong>My Speed Dial</strong> v1.2.0</p>
+          <p data-i18n="description">A clean and efficient new tab speed dial extension</p>
+          <div class="changelog">
+            <p class="changelog-title" data-i18n="v120Changes">v1.2.0 Changes:</p>
+            <ul>
+              <li data-i18n="v120Change1">Added multi-language support (5 languages)</li>
+            </ul>
+            <p class="changelog-title" data-i18n="v110Changes">v1.1.0 Changes:</p>
+            <ul>
+              <li data-i18n="v110Change1">Removed search bar, focus on shortcuts</li>
+              <li data-i18n="v110Change2">Removed clock display, cleaner interface</li>
+              <li data-i18n="v110Change3">Fixed items per row setting not working</li>
+              <li data-i18n="v110Change4">Optimized settings page layout</li>
+            </ul>
+          </div>
         </div>
       </section>
     </main>
 
     <footer>
-      <button id="saveBtn" class="btn btn-primary">保存设置</button>
+      <button id="saveBtn" class="btn btn-primary" data-i18n="saveSettings">Save Settings</button>
       <span id="saveStatus" class="save-status"></span>
     </footer>
   </div>
 
+  <script src="i18n.js"></script>
   <script src="options.js"></script>
 </body>
 </html>

@@ -3,25 +3,55 @@
  * 使用 Chrome Storage Sync API 同步配置
  */
 
+// 默认 SVG 图标 - 用于没有自定义图标的网页
+const DEFAULT_ICON_SVG = `<svg width="800px" height="800px" viewBox="0 0 512 512" version="1.1" xmlns="http://www.w3.org/2000/svg">
+<style type="text/css">
+	.st0{fill:#333333;}
+</style>
+<g>
+<path class="st0" d="M393.87,74.21H118.13c-24.25,0-43.91,19.66-43.91,43.91v275.74c0,24.25,19.66,43.91,43.91,43.91h275.74    c24.25,0,43.91-19.66,43.91-43.91V118.13C437.79,93.87,418.13,74.21,393.87,74.21z M354.04,272H272v82.04c0,8.84-7.16,16-16,16    s-16-7.16-16-16V272h-82.04c-8.84,0-16-7.16-16-16s7.16-16,16-16H240v-82.04c0-8.84,7.16-16,16-16s16,7.16,16,16V240h82.04    c8.84,0,16,7.16,16,16S362.88,272,354.04,272z"/>
+</g>
+</svg>`;
+
 class SpeedDial {
   constructor() {
     this.dials = [];
     this.settings = {
       columns: 6,
-      showClock: true,
-      showSearch: true,
-      searchEngine: 'google'
+      language: 'zh-CN'
     };
     this.editingIndex = null;
     this.init();
   }
 
   async init() {
+    await i18n.init();
     await this.loadData();
+    this.applyI18n();
     this.renderDials();
-    this.setupClock();
-    this.setupSearch();
+    this.applySettings();
     this.setupEventListeners();
+  }
+
+  // 应用国际化
+  applyI18n() {
+    // 更新所有带 data-i18n 属性的元素
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      el.textContent = i18n.t(key);
+    });
+    // 更新 placeholder
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+      const key = el.getAttribute('data-i18n-placeholder');
+      el.placeholder = i18n.t(key);
+    });
+    // 更新 title
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+      const key = el.getAttribute('data-i18n-title');
+      el.title = i18n.t(key);
+    });
+    // 更新页面标题
+    document.title = i18n.t('newTab');
   }
 
   // 加载数据
@@ -143,6 +173,9 @@ class SpeedDial {
     const grid = document.getElementById('dialsGrid');
     grid.innerHTML = '';
 
+    // 应用列数设置
+    this.applySettings();
+
     this.dials.forEach((dial, index) => {
       const dialEl = this.createDialElement(dial, index);
       grid.appendChild(dialEl);
@@ -153,7 +186,7 @@ class SpeedDial {
     addBtn.className = 'dial-item dial-add';
     addBtn.innerHTML = `
       <div class="add-icon">+</div>
-      <span class="dial-name">添加快捷方式</span>
+      <span class="dial-name">${i18n.t('addShortcut')}</span>
     `;
     addBtn.addEventListener('click', () => this.openModal());
     grid.appendChild(addBtn);
@@ -199,14 +232,8 @@ class SpeedDial {
       // 非 SVG 格式，忽略并使用默认
     }
 
-    // 使用 Google Favicon 服务
-    try {
-      const url = new URL(dial.url);
-      const faviconUrl = `https://www.google.com/s2/favicons?domain=${url.hostname}&sz=64`;
-      return `<img src="${faviconUrl}" alt="${this.escapeHtml(dial.name)}" onerror="this.parentElement.innerHTML='${this.getLetterIcon(dial.name)}'">`;
-    } catch {
-      return this.getLetterIcon(dial.name);
-    }
+    // 使用默认 SVG 图标
+    return DEFAULT_ICON_SVG;
   }
 
   // 获取字母图标
@@ -216,54 +243,11 @@ class SpeedDial {
     return `<div class="letter-icon" style="background: ${color}">${letter}</div>`;
   }
 
-  // 设置时钟
-  setupClock() {
-    const updateClock = () => {
-      const now = new Date();
-      const hours = String(now.getHours()).padStart(2, '0');
-      const minutes = String(now.getMinutes()).padStart(2, '0');
-      document.getElementById('clock').textContent = `${hours}:${minutes}`;
-
-      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-      document.getElementById('date').textContent = now.toLocaleDateString('zh-CN', options);
-    };
-
-    updateClock();
-    setInterval(updateClock, 1000);
-  }
-
-  // 设置搜索
-  setupSearch() {
-    const searchInput = document.getElementById('searchInput');
-    
-    searchInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        const query = searchInput.value.trim();
-        if (query) {
-          let searchUrl;
-          // 检测是否为 URL
-          if (this.isValidUrl(query)) {
-            searchUrl = query.startsWith('http') ? query : `https://${query}`;
-          } else {
-            // 使用搜索引擎
-            const engines = {
-              google: 'https://www.google.com/search?q=',
-              bing: 'https://www.bing.com/search?q=',
-              baidu: 'https://www.baidu.com/s?wd=',
-              duckduckgo: 'https://duckduckgo.com/?q='
-            };
-            searchUrl = engines[this.settings.searchEngine] + encodeURIComponent(query);
-          }
-          window.location.href = searchUrl;
-        }
-      }
-    });
-  }
-
-  // 检测是否为有效 URL
-  isValidUrl(str) {
-    const urlPattern = /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/;
-    return urlPattern.test(str);
+  // 应用设置
+  applySettings() {
+    const grid = document.getElementById('dialsGrid');
+    const columns = this.settings.columns || 6;
+    grid.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
   }
 
   // 设置事件监听
@@ -307,13 +291,13 @@ class SpeedDial {
     if (index !== null) {
       // 编辑模式
       const dial = this.dials[index];
-      title.textContent = '编辑快捷方式';
+      title.textContent = i18n.t('editShortcut');
       nameInput.value = dial.name;
       urlInput.value = dial.url;
       iconInput.value = dial.icon || '';
     } else {
       // 新增模式
-      title.textContent = '添加快捷方式';
+      title.textContent = i18n.t('addShortcut');
       nameInput.value = '';
       urlInput.value = '';
       iconInput.value = '';
@@ -336,7 +320,7 @@ class SpeedDial {
     const iconInput = document.getElementById('dialIcon').value.trim();
 
     if (!name || !url) {
-      alert('请填写名称和网址');
+      alert(i18n.t('fillNameUrl'));
       return;
     }
 
@@ -344,7 +328,7 @@ class SpeedDial {
     let icon = '';
     if (iconInput) {
       if (!this.isValidSvg(iconInput)) {
-        alert('图标格式无效！只支持 SVG 代码。\n\n请粘贴以 <svg 开头的 SVG 代码，或留空使用默认图标。');
+        alert(i18n.t('invalidIcon'));
         return;
       }
       icon = iconInput;
@@ -385,7 +369,7 @@ class SpeedDial {
 
   // 删除快捷方式
   async deleteDial(index) {
-    if (confirm('确定要删除这个快捷方式吗？')) {
+    if (confirm(i18n.t('confirmDelete'))) {
       this.dials.splice(index, 1);
       await this.saveData();
       this.renderDials();
