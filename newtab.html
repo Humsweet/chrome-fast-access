@@ -103,9 +103,9 @@
             <div class="settings-item">
               <label for="iconScaleSettings">
                 <span data-i18n="iconSize">Icon Size</span>
-                <span class="scale-value" id="scaleValue">1.5x</span>
+                <span class="scale-value" id="scaleValue">1x</span>
               </label>
-              <input type="range" id="iconScaleSettings" min="0.5" max="2" step="0.1" value="1.5">
+              <input type="range" id="iconScaleSettings" min="0.75" max="1.25" step="0.05" value="1">
             </div>
           </div>
 
@@ -130,31 +130,37 @@
             <h3 data-i18n="dataManagement">Data Management</h3>
             <p class="section-description" data-i18n="dataManagementDescription">Manage your shortcuts and settings. Export to backup, import to restore, or reset to start fresh.</p>
 
-            <div class="settings-buttons">
-              <button id="exportBtnSettings" class="btn btn-secondary">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                  <polyline points="7 10 12 15 17 10"></polyline>
-                  <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg>
-                <span data-i18n="exportConfig">Export</span>
-              </button>
-              <button id="importBtnSettings" class="btn btn-secondary">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                  <polyline points="17 8 12 3 7 8"></polyline>
-                  <line x1="12" y1="3" x2="12" y2="15"></line>
-                </svg>
-                <span data-i18n="importConfig">Import</span>
-              </button>
-              <button id="resetBtnSettings" class="btn btn-secondary btn-reset">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-                  <polyline points="3 6 5 6 21 6"></polyline>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                </svg>
-                <span data-i18n="resetAll">Reset All</span>
-              </button>
-              <input type="file" id="importFileSettings" accept=".json" hidden>
+            <div class="settings-item settings-item-config">
+              <div class="settings-item-header">
+                <label data-i18n="configFile">Configuration</label>
+                <small class="settings-item-hint" data-i18n="configFileHint">Supports importing Speed Dial 2 configuration files.</small>
+              </div>
+              <div class="settings-buttons-row">
+                <button id="exportBtnSettings" class="btn btn-secondary">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+                  <span data-i18n="exportConfig">Export</span>
+                </button>
+                <button id="importBtnSettings" class="btn btn-secondary">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                  </svg>
+                  <span data-i18n="importConfig">Import</span>
+                </button>
+                <button id="resetBtnSettings" class="btn btn-secondary btn-reset">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                  <span data-i18n="resetAll">Reset All</span>
+                </button>
+                <input type="file" id="importFileSettings" accept=".json" hidden>
+              </div>
             </div>
           </div>
 
@@ -199,8 +205,15 @@
           <div class="settings-section" data-section="about">
             <h3 data-i18n="about">About</h3>
             <div class="about-info-settings">
-              <p><strong>fast-access</strong> v1.2.0</p>
+              <p><strong>fast-access</strong> v1.3.0</p>
               <p data-i18n="description">A clean and efficient new tab speed dial extension</p>
+              <div class="changelog">
+                <p><strong data-i18n="v130Changes">v1.3.0 Changes:</strong></p>
+                <ul>
+                  <li data-i18n="v130Change1">Support importing Speed Dial 2 configuration files</li>
+                  <li data-i18n="v130Change2">Improved data management interface</li>
+                </ul>
+              </div>
             </div>
           </div>
 

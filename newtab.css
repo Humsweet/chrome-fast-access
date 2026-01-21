@@ -14,11 +14,12 @@
   --border-color: rgba(55, 53, 47, 0.09);
   --border-radius: 8px;
   --shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  /* 动态缩放变量 - 默认 1.5x */
-  --icon-size: 72px;
-  --card-size: 150px;
-  --gap-size: 24px;
-  --icon-margin: 15px;
+  /* 动态缩放变量 - 默认 2x */
+  --icon-size: 96px;
+  --card-size: 200px;
+  --gap-size: 32px;
+  --icon-margin: 20px;
+  --font-size: 18px;
 }
 
 body {
@@ -104,10 +105,10 @@ body {
 }
 
 .dial-name {
-  font-size: 18px;
+  font-size: var(--font-size);
   font-weight: 700;
   text-align: center;
-  max-width: 120px;
+  max-width: var(--card-size);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -685,6 +686,44 @@ body {
   transform: scale(1.1);
 }
 
+/* Configuration file section */
+.settings-item-config {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 16px;
+}
+
+.settings-item-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings-item-header label {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.settings-item-hint {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.settings-buttons-row {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.settings-buttons-row .btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
 .settings-buttons {
   display: flex;
   gap: 12px;
@@ -743,6 +782,21 @@ body {
 
 .about-info-settings strong {
   color: var(--text-color);
+}
+
+.changelog {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+}
+
+.changelog ul {
+  margin: 8px 0 0 0;
+  padding-left: 20px;
+}
+
+.changelog li {
+  margin-bottom: 4px;
 }
 
 .settings-footer {
@@ -805,6 +859,14 @@ body {
   }
 
   .settings-item input[type="range"] {
+    width: 100%;
+  }
+
+  .settings-buttons-row {
+    flex-direction: column;
+  }
+
+  .settings-buttons-row .btn {
     width: 100%;
   }
 }

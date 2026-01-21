@@ -69,6 +69,12 @@ const i18n = {
       fillNameUrl: 'Please fill in name and URL',
       invalidIcon: 'Invalid icon format! Only SVG code is supported.\n\nPlease paste SVG code starting with <svg, or leave empty to use default icon.',
       importDataTooLarge: 'Imported data is too large (over 100KB), may not fully sync to other devices. Please reduce shortcuts or simplify SVG icons.',
+      configFile: 'Configuration',
+      configFileHint: 'Supports importing Speed Dial 2 configuration files.',
+      speedDial2Detected: 'Speed Dial 2 configuration detected. How would you like to import?',
+      addToExisting: 'Add to existing',
+      replaceAll: 'Replace all',
+      importedCount: 'shortcuts imported',
 
       // 更新日志
       v110Changes: 'v1.1.0 Changes:',
@@ -77,7 +83,10 @@ const i18n = {
       v110Change3: 'Fixed items per row setting not working',
       v110Change4: 'Optimized settings page layout',
       v120Changes: 'v1.2.0 Changes:',
-      v120Change1: 'Added multi-language support (5 languages)'
+      v120Change1: 'Added multi-language support (5 languages)',
+      v130Changes: 'v1.3.0 Changes:',
+      v130Change1: 'Support importing Speed Dial 2 configuration files',
+      v130Change2: 'Improved data management interface'
     },
 
     'zh-CN': {
@@ -140,6 +149,12 @@ const i18n = {
       fillNameUrl: '请填写名称和网址',
       invalidIcon: '图标格式无效！只支持 SVG 代码。\n\n请粘贴以 <svg 开头的 SVG 代码，或留空使用默认图标。',
       importDataTooLarge: '导入的数据过大（超过100KB），可能无法完全同步到其他设备。请减少快捷方式数量或简化 SVG 图标。',
+      configFile: '配置文件',
+      configFileHint: '支持导入 Speed Dial 2 的配置文件。',
+      speedDial2Detected: '检测到 Speed Dial 2 配置文件，请选择导入方式：',
+      addToExisting: '追加到现有',
+      replaceAll: '替换全部',
+      importedCount: '个快捷方式已导入',
 
       // 更新日志
       v110Changes: 'v1.1.0 更新内容：',
@@ -148,7 +163,10 @@ const i18n = {
       v110Change3: '修复每行显示数量设置不生效的问题',
       v110Change4: '优化设置页面布局，更加紧凑',
       v120Changes: 'v1.2.0 更新内容：',
-      v120Change1: '新增多语言支持（5种语言）'
+      v120Change1: '新增多语言支持（5种语言）',
+      v130Changes: 'v1.3.0 更新内容：',
+      v130Change1: '支持导入 Speed Dial 2 配置文件',
+      v130Change2: '优化数据管理界面'
     },
 
     'zh-TW': {
@@ -211,6 +229,12 @@ const i18n = {
       fillNameUrl: '請填寫名稱和網址',
       invalidIcon: '圖示格式無效！僅支援 SVG 代碼。\n\n請貼上以 <svg 開頭的 SVG 代碼，或留空使用預設圖示。',
       importDataTooLarge: '匯入的資料過大（超過100KB），可能無法完全同步至其他裝置。請減少捷徑數量或簡化 SVG 圖示。',
+      configFile: '設定檔',
+      configFileHint: '支援匯入 Speed Dial 2 的設定檔。',
+      speedDial2Detected: '偵測到 Speed Dial 2 設定檔，請選擇匯入方式：',
+      addToExisting: '追加到現有',
+      replaceAll: '取代全部',
+      importedCount: '個捷徑已匯入',
 
       // 更新日志
       v110Changes: 'v1.1.0 更新內容：',
@@ -219,7 +243,10 @@ const i18n = {
       v110Change3: '修復每列顯示數量設定不生效的問題',
       v110Change4: '優化設定頁面佈局，更加緊湊',
       v120Changes: 'v1.2.0 更新內容：',
-      v120Change1: '新增多語言支援（5種語言）'
+      v120Change1: '新增多語言支援（5種語言）',
+      v130Changes: 'v1.3.0 更新內容：',
+      v130Change1: '支援匯入 Speed Dial 2 設定檔',
+      v130Change2: '優化資料管理介面'
     },
 
     'ja': {
@@ -282,6 +309,12 @@ const i18n = {
       fillNameUrl: '名前とURLを入力してください',
       invalidIcon: 'アイコン形式が無効です！SVGコードのみサポートしています。\n\n<svgで始まるSVGコードを貼り付けるか、空欄にしてデフォルトアイコンを使用してください。',
       importDataTooLarge: 'インポートデータが大きすぎます（100KB超）。他のデバイスに完全に同期できない可能性があります。ショートカットを減らすか、SVGアイコンを簡略化してください。',
+      configFile: '設定ファイル',
+      configFileHint: 'Speed Dial 2 の設定ファイルのインポートに対応しています。',
+      speedDial2Detected: 'Speed Dial 2 の設定ファイルを検出しました。インポート方法を選択してください：',
+      addToExisting: '既存に追加',
+      replaceAll: 'すべて置換',
+      importedCount: '個のショートカットをインポートしました',
 
       // 更新日志
       v110Changes: 'v1.1.0 更新内容：',
@@ -290,7 +323,10 @@ const i18n = {
       v110Change3: '1行あたりの表示数設定が機能しない問題を修正',
       v110Change4: '設定ページのレイアウトを最適化',
       v120Changes: 'v1.2.0 更新内容：',
-      v120Change1: '多言語サポートを追加（5言語）'
+      v120Change1: '多言語サポートを追加（5言語）',
+      v130Changes: 'v1.3.0 更新内容：',
+      v130Change1: 'Speed Dial 2 設定ファイルのインポートに対応',
+      v130Change2: 'データ管理インターフェースを改善'
     },
 
     'es': {
@@ -353,6 +389,12 @@ const i18n = {
       fillNameUrl: 'Por favor, completa el nombre y la URL',
       invalidIcon: '¡Formato de icono no válido! Solo se admite código SVG.\n\nPega código SVG que comience con <svg, o déjalo vacío para usar el icono predeterminado.',
       importDataTooLarge: 'Los datos importados son demasiado grandes (más de 100KB), puede que no se sincronicen completamente con otros dispositivos. Reduce los accesos directos o simplifica los iconos SVG.',
+      configFile: 'Archivo de configuración',
+      configFileHint: 'Compatible con la importación de archivos de configuración de Speed Dial 2.',
+      speedDial2Detected: 'Se detectó configuración de Speed Dial 2. ¿Cómo deseas importar?',
+      addToExisting: 'Añadir a existentes',
+      replaceAll: 'Reemplazar todo',
+      importedCount: 'accesos directos importados',
 
       // 更新日志
       v110Changes: 'Cambios en v1.1.0:',
@@ -361,7 +403,10 @@ const i18n = {
       v110Change3: 'Corregido el problema de elementos por fila que no funcionaba',
       v110Change4: 'Optimizado el diseño de la página de configuración',
       v120Changes: 'Cambios en v1.2.0:',
-      v120Change1: 'Añadido soporte multiidioma (5 idiomas)'
+      v120Change1: 'Añadido soporte multiidioma (5 idiomas)',
+      v130Changes: 'Cambios en v1.3.0:',
+      v130Change1: 'Soporte para importar archivos de configuración de Speed Dial 2',
+      v130Change2: 'Interfaz de gestión de datos mejorada'
     }
   },
 

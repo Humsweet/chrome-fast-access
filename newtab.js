@@ -15,7 +15,7 @@ class SpeedDial {
     this.settings = {
       columns: 4,
       language: 'zh-CN',
-      iconScale: 1.5
+      iconScale: 1
     };
     this.editingIndex = null;
     this.init();
@@ -244,27 +244,31 @@ class SpeedDial {
   applySettings() {
     const grid = document.getElementById('dialsGrid');
     const columns = this.settings.columns || 4;
-    const scale = this.settings.iconScale || 1.5;
+    const scale = this.settings.iconScale || 1;
 
-    // 应用缩放比例到 CSS 变量
-    const baseIconSize = 48; // 基础图标大小
-    const baseCardSize = 100; // 基础卡片大小
-    const baseGap = 16; // 基础间距
-    const baseMargin = 10; // 基础图标下边距
+    // 基础尺寸（1x 时的大小）
+    const baseIconSize = 96;
+    const baseCardSize = 200;
+    const baseGap = 32;
+    const baseMargin = 20;
+    const baseFontSize = 18;
 
     const scaledIconSize = baseIconSize * scale;
     const scaledCardSize = baseCardSize * scale;
     const scaledGap = baseGap * scale;
     const scaledMargin = baseMargin * scale;
+    const scaledFontSize = baseFontSize * scale;
 
     document.documentElement.style.setProperty('--icon-size', `${scaledIconSize}px`);
     document.documentElement.style.setProperty('--card-size', `${scaledCardSize}px`);
     document.documentElement.style.setProperty('--gap-size', `${scaledGap}px`);
     document.documentElement.style.setProperty('--icon-margin', `${scaledMargin}px`);
+    document.documentElement.style.setProperty('--font-size', `${scaledFontSize}px`);
 
-    // 计算网格最大宽度以控制每行数量
-    const maxWidth = (scaledCardSize * columns) + (scaledGap * (columns - 1));
-    grid.style.maxWidth = `${maxWidth}px`;
+    // 计算网格宽度以控制每行数量
+    const gridWidth = (scaledCardSize * columns) + (scaledGap * (columns - 1));
+    grid.style.width = `${gridWidth}px`;
+    grid.style.maxWidth = '100%';
   }
 
   // 设置事件监听
@@ -369,8 +373,8 @@ class SpeedDial {
 
     // 填充当前设置
     document.getElementById('columnsSettings').value = this.settings.columns || 6;
-    document.getElementById('iconScaleSettings').value = this.settings.iconScale || 1.5;
-    document.getElementById('scaleValue').textContent = `${this.settings.iconScale || 1.5}x`;
+    document.getElementById('iconScaleSettings').value = this.settings.iconScale || 1;
+    document.getElementById('scaleValue').textContent = `${this.settings.iconScale || 1}x`;
     document.getElementById('languageSettings').value = this.settings.language || i18n.getLanguage();
 
     // 检查同步状态
@@ -433,6 +437,41 @@ class SpeedDial {
     URL.revokeObjectURL(url);
   }
 
+  // 检测是否为 Speed Dial 2 配置格式
+  isSpeedDial2Format(data) {
+    // Speed Dial 2 格式包含 dials 数组，且每个 dial 有 title 和 url（而不是 name）
+    if (data.dials && Array.isArray(data.dials) && data.dials.length > 0) {
+      const firstDial = data.dials[0];
+      // Speed Dial 2 使用 title，我们的格式使用 name
+      if (firstDial.title !== undefined && firstDial.url !== undefined && firstDial.name === undefined) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // 从 Speed Dial 2 格式转换数据
+  convertFromSpeedDial2(data) {
+    return data.dials.map(dial => ({
+      name: dial.title || '',
+      url: dial.url || '',
+      icon: '' // 使用默认图标
+    }));
+  }
+
+  // 显示导入选项对话框
+  showImportDialog(convertedDials) {
+    return new Promise((resolve) => {
+      const message = `${i18n.t('speedDial2Detected')}\n\n` +
+        `• ${i18n.t('addToExisting')}\n` +
+        `• ${i18n.t('replaceAll')}`;
+
+      // 使用自定义对话框
+      const result = confirm(message + '\n\n' + i18n.t('addToExisting') + '? (OK=' + i18n.t('addToExisting') + ', Cancel=' + i18n.t('replaceAll') + ')');
+      resolve(result ? 'add' : 'replace');
+    });
+  }
+
   // 导入数据
   importData(file) {
     if (!file) return;
@@ -442,34 +481,54 @@ class SpeedDial {
       try {
         const data = JSON.parse(e.target.result);
 
-        // 检查数据大小
-        const dataSize = new Blob([JSON.stringify(data)]).size;
-        if (dataSize > 102400) {
-          alert(i18n.t('importDataTooLarge'));
-        }
+        // 检测是否为 Speed Dial 2 格式
+        if (this.isSpeedDial2Format(data)) {
+          const convertedDials = this.convertFromSpeedDial2(data);
+          const action = await this.showImportDialog(convertedDials);
 
-        await new Promise((resolve) => {
-          chrome.storage.sync.set(data, () => {
-            if (chrome.runtime.lastError) {
-              // 同步失败，尝试保存到本地
-              chrome.storage.local.set(data, () => {
-                alert(i18n.t('savedToLocal'));
-                resolve();
-              });
-            } else {
-              // 同时保存到本地
-              chrome.storage.local.set(data, resolve);
-            }
+          if (action === 'add') {
+            // 追加到现有快捷方式
+            this.dials = [...this.dials, ...convertedDials];
+          } else {
+            // 替换全部
+            this.dials = convertedDials;
+          }
+
+          await this.saveData();
+
+          // 显示导入成功消息
+          alert(`${convertedDials.length} ${i18n.t('importedCount')}`);
+        } else {
+          // 原有格式的导入逻辑
+          // 检查数据大小
+          const dataSize = new Blob([JSON.stringify(data)]).size;
+          if (dataSize > 102400) {
+            alert(i18n.t('importDataTooLarge'));
+          }
+
+          await new Promise((resolve) => {
+            chrome.storage.sync.set(data, () => {
+              if (chrome.runtime.lastError) {
+                // 同步失败，尝试保存到本地
+                chrome.storage.local.set(data, () => {
+                  alert(i18n.t('savedToLocal'));
+                  resolve();
+                });
+              } else {
+                // 同时保存到本地
+                chrome.storage.local.set(data, resolve);
+              }
+            });
           });
-        });
 
-        // 重新加载数据
-        await this.loadData();
+          // 重新加载数据
+          await this.loadData();
+        }
 
         // 更新设置弹窗表单
         document.getElementById('columnsSettings').value = this.settings.columns || 6;
-        document.getElementById('iconScaleSettings').value = this.settings.iconScale || 1.5;
-        document.getElementById('scaleValue').textContent = `${this.settings.iconScale || 1.5}x`;
+        document.getElementById('iconScaleSettings').value = this.settings.iconScale || 1;
+        document.getElementById('scaleValue').textContent = `${this.settings.iconScale || 1}x`;
         document.getElementById('languageSettings').value = this.settings.language || i18n.getLanguage();
 
         // 应用设置
@@ -502,7 +561,7 @@ class SpeedDial {
       this.settings = {
         columns: 4,
         language: 'zh-CN',
-        iconScale: 1.5
+        iconScale: 1
       };
 
       // 重置为默认快捷方式
