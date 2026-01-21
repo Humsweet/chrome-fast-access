@@ -91,15 +91,12 @@ class OptionsPage {
   showSaveStatus(message, isError = false) {
     const status = document.getElementById('saveStatus');
     status.textContent = message;
-    status.classList.remove('success', 'error');
-    if (isError) {
-      status.classList.add('error');
-    } else {
-      status.classList.add('success');
-    }
+    status.style.background = isError ? '#ff6b6b' : 'rgba(55, 53, 47, 0.08)';
+    status.style.color = isError ? 'white' : '#37352f';
+    status.style.border = isError ? 'none' : '1px solid rgba(55, 53, 47, 0.09)';
     status.classList.add('show');
     setTimeout(() => {
-      status.classList.remove('show', 'success', 'error');
+      status.classList.remove('show');
     }, isError ? 5000 : 3000);
   }
 

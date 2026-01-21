@@ -10,7 +10,6 @@
   --text-color: #37352f;
   --text-secondary: #6b6b6b;
   --accent-color: #2383e2;
-  --success-color: #2ea44f;
   --border-color: rgba(55, 53, 47, 0.09);
   --danger-color: #e03e3e;
 }
@@ -86,10 +85,27 @@ header h1 {
   flex-wrap: wrap;
 }
 
-.data-desc {
-  font-size: 13px;
+/* Data Management 描述 */
+.data-management-description {
   color: var(--text-secondary);
-  margin: 6px 0 10px 0;
+  font-size: 13px;
+  line-height: 1.5;
+  margin-bottom: 12px;
+  padding: 0;
+}
+
+/* Data Management 按钮容器 */
+.setting-item.data-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-start;
+  border-bottom: none;
+  padding: 8px 0 0 0;
+}
+
+/* Reset 按钮红色字体 */
+.btn-reset {
+  color: var(--danger-color) !important;
 }
 
 /* 选择框 */
@@ -201,12 +217,12 @@ input:checked + .slider:before {
 }
 
 .btn-primary {
-  background: var(--accent-color);
+  background: #37352f;
   color: white;
 }
 
 .btn-primary:hover {
-  background: #1a73d1;
+  background: #1f1e1b;
 }
 
 .btn-danger {
@@ -276,9 +292,7 @@ footer {
 
 .save-status {
   font-size: 13px;
-  color: var(--text-color);
-  background: rgba(55, 53, 47, 0.04);
-  border: 1px solid var(--border-color);
+  color: white;
   opacity: 0;
   transition: opacity 0.3s;
   padding: 5px 10px;
@@ -325,32 +339,6 @@ footer {
   flex-shrink: 0;
   margin-top: 1px;
   color: var(--accent-color);
-}
-
-/* Specific button label color overrides so icons keep default color */
-.reset-btn svg,
-.save-btn svg {
-  color: var(--text-color);
-}
-.reset-btn .btn-label {
-  color: var(--danger-color);
-  font-weight: 500;
-}
-.save-btn .btn-label {
-  color: var(--accent-color);
-  font-weight: 500;
-}
-
-.save-status.show {
-  opacity: 1;
-}
-
-.save-status.success {
-  color: var(--success-color);
-}
-
-.save-status.error {
-  color: var(--danger-color);
 }
 
 /* 响应式 */

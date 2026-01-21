@@ -54,8 +54,8 @@
       <!-- 数据管理 -->
       <section class="settings-section">
         <h2 data-i18n="dataManagement">Data Management</h2>
-        <p class="data-desc" data-i18n="dataManagementDesc">导出/导入用于备份或恢复您的设置；重置将清除所有设置并恢复为默认值。请在操作前确认已备份重要配置。</p>
-        <div class="setting-item buttons">
+        <p class="data-management-description" data-i18n="dataManagementDescription">Manage your shortcuts and settings. Export to backup, import to restore, or reset to start fresh.</p>
+        <div class="setting-item data-buttons">
           <button id="exportBtn" class="btn btn-secondary">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -72,16 +72,14 @@
             </svg>
             <span data-i18n="importConfig">Import</span>
           </button>
-          <input type="file" id="importFile" accept=".json" hidden>
-        </div>
-        <div class="setting-item">
-          <button id="resetBtn" class="btn btn-secondary reset-btn">
+          <button id="resetBtn" class="btn btn-secondary btn-reset">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
               <polyline points="3 6 5 6 21 6"></polyline>
               <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
             </svg>
-            <span class="btn-label" data-i18n="resetAll">Reset All</span>
+            <span data-i18n="resetAll">Reset All</span>
           </button>
+          <input type="file" id="importFile" accept=".json" hidden>
         </div>
       </section>
 
@@ -145,7 +143,7 @@
     </main>
 
     <footer>
-      <button id="saveBtn" class="btn btn-secondary save-btn"><span class="btn-label" data-i18n="saveSettings">Save Settings</span></button>
+      <button id="saveBtn" class="btn btn-primary" data-i18n="saveSettings">Save Settings</button>
       <span id="saveStatus" class="save-status"></span>
     </footer>
   </div>
