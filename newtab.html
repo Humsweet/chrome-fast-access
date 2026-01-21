@@ -62,6 +62,156 @@
       </div>
     </div>
 
+    <!-- 设置弹窗 -->
+    <div id="settingsModal" class="settings-modal hidden">
+      <div class="settings-modal-content">
+        <!-- 左侧导航 -->
+        <div class="settings-sidebar">
+          <h2 class="settings-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            <span data-i18n="settings">Settings</span>
+          </h2>
+          <nav class="settings-nav">
+            <a href="#" class="settings-nav-item active" data-section="display" data-i18n="displaySettings">Display Settings</a>
+            <a href="#" class="settings-nav-item" data-section="language" data-i18n="languageSettings">Language</a>
+            <a href="#" class="settings-nav-item" data-section="data" data-i18n="dataManagement">Data Management</a>
+            <a href="#" class="settings-nav-item" data-section="sync" data-i18n="syncStatus">Sync Status</a>
+            <a href="#" class="settings-nav-item" data-section="about" data-i18n="about">About</a>
+          </nav>
+        </div>
+
+        <!-- 右侧内容区 -->
+        <div class="settings-main">
+          <button class="settings-close" id="settingsClose">&times;</button>
+
+          <!-- 显示设置 -->
+          <div class="settings-section active" data-section="display">
+            <h3 data-i18n="displaySettings">Display Settings</h3>
+
+            <div class="settings-item">
+              <label for="columnsSettings" data-i18n="columnsPerRow">Items per row</label>
+              <select id="columnsSettings">
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+            </div>
+
+            <div class="settings-item">
+              <label for="iconScaleSettings">
+                <span data-i18n="iconSize">Icon Size</span>
+                <span class="scale-value" id="scaleValue">1.5x</span>
+              </label>
+              <input type="range" id="iconScaleSettings" min="0.5" max="2" step="0.1" value="1.5">
+            </div>
+          </div>
+
+          <!-- 语言设置 -->
+          <div class="settings-section" data-section="language">
+            <h3 data-i18n="languageSettings">Language</h3>
+
+            <div class="settings-item">
+              <label for="languageSettings" data-i18n="language">Language</label>
+              <select id="languageSettings">
+                <option value="en">English</option>
+                <option value="zh-CN">简体中文</option>
+                <option value="zh-TW">繁體中文</option>
+                <option value="ja">日本語</option>
+                <option value="es">Español</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 数据管理 -->
+          <div class="settings-section" data-section="data">
+            <h3 data-i18n="dataManagement">Data Management</h3>
+            <p class="section-description" data-i18n="dataManagementDescription">Manage your shortcuts and settings. Export to backup, import to restore, or reset to start fresh.</p>
+
+            <div class="settings-buttons">
+              <button id="exportBtnSettings" class="btn btn-secondary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span data-i18n="exportConfig">Export</span>
+              </button>
+              <button id="importBtnSettings" class="btn btn-secondary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <span data-i18n="importConfig">Import</span>
+              </button>
+              <button id="resetBtnSettings" class="btn btn-secondary btn-reset">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                <span data-i18n="resetAll">Reset All</span>
+              </button>
+              <input type="file" id="importFileSettings" accept=".json" hidden>
+            </div>
+          </div>
+
+          <!-- 同步状态 -->
+          <div class="settings-section" data-section="sync">
+            <h3 data-i18n="syncStatus">Sync Status</h3>
+
+            <div class="sync-info-settings" id="syncInfoSettings">
+              <div class="sync-item-settings">
+                <span data-i18n="syncUsage">Sync storage usage:</span>
+                <span id="syncUsageSettings" data-i18n="checking">Checking...</span>
+              </div>
+              <div class="sync-item-settings">
+                <span data-i18n="localUsage">Local storage usage:</span>
+                <span id="localUsageSettings" data-i18n="checking">Checking...</span>
+              </div>
+              <div class="sync-item-settings">
+                <span data-i18n="syncState">Sync status:</span>
+                <span id="syncStatusTextSettings" data-i18n="checking">Checking...</span>
+              </div>
+              <p class="sync-tip-settings">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="16" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                <span data-i18n="syncTip">Tip: Chrome sync storage limit is 100KB, max 8KB per item. Only SVG icons are supported for sync.</span>
+              </p>
+              <button id="checkSyncBtnSettings" class="btn btn-secondary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                  <path d="M21 2v6h-6"></path>
+                  <path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
+                  <path d="M3 22v-6h6"></path>
+                  <path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path>
+                </svg>
+                <span data-i18n="checkSync">Check Sync</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 关于 -->
+          <div class="settings-section" data-section="about">
+            <h3 data-i18n="about">About</h3>
+            <div class="about-info-settings">
+              <p><strong>fast-access</strong> v1.2.0</p>
+              <p data-i18n="description">A clean and efficient new tab speed dial extension</p>
+            </div>
+          </div>
+
+          <!-- 保存按钮 -->
+          <div class="settings-footer">
+            <button id="saveSettingsBtn" class="btn btn-dark" data-i18n="saveSettings">Save Settings</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- 设置按钮 -->
     <button id="settingsBtn" class="settings-btn" data-i18n-title="settings" title="Settings">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

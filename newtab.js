@@ -4,21 +4,18 @@
  */
 
 // 默认 SVG 图标 - 用于没有自定义图标的网页
-const DEFAULT_ICON_SVG = `<svg width="800px" height="800px" viewBox="0 0 512 512" version="1.1" xmlns="http://www.w3.org/2000/svg">
-<style type="text/css">
-	.st0{fill:#333333;}
-</style>
-<g>
-<path class="st0" d="M393.87,74.21H118.13c-24.25,0-43.91,19.66-43.91,43.91v275.74c0,24.25,19.66,43.91,43.91,43.91h275.74    c24.25,0,43.91-19.66,43.91-43.91V118.13C437.79,93.87,418.13,74.21,393.87,74.21z M354.04,272H272v82.04c0,8.84-7.16,16-16,16    s-16-7.16-16-16V272h-82.04c-8.84,0-16-7.16-16-16s7.16-16,16-16H240v-82.04c0-8.84,7.16-16,16-16s16,7.16,16,16V240h82.04    c8.84,0,16,7.16,16,16S362.88,272,354.04,272z"/>
-</g>
+const DEFAULT_ICON_SVG = `<svg width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path opacity="0.15" d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" fill="#000000"/>
+<path d="M12 17V16.9929M12 14.8571C12 11.6429 15 12.3571 15 9.85714C15 8.27919 13.6568 7 12 7C10.6567 7 9.51961 7.84083 9.13733 9M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
 
 class SpeedDial {
   constructor() {
     this.dials = [];
     this.settings = {
-      columns: 6,
-      language: 'zh-CN'
+      columns: 4,
+      language: 'zh-CN',
+      iconScale: 1.5
     };
     this.editingIndex = null;
     this.init();
@@ -246,8 +243,28 @@ class SpeedDial {
   // 应用设置
   applySettings() {
     const grid = document.getElementById('dialsGrid');
-    const columns = this.settings.columns || 6;
-    grid.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+    const columns = this.settings.columns || 4;
+    const scale = this.settings.iconScale || 1.5;
+
+    // 应用缩放比例到 CSS 变量
+    const baseIconSize = 48; // 基础图标大小
+    const baseCardSize = 100; // 基础卡片大小
+    const baseGap = 16; // 基础间距
+    const baseMargin = 10; // 基础图标下边距
+
+    const scaledIconSize = baseIconSize * scale;
+    const scaledCardSize = baseCardSize * scale;
+    const scaledGap = baseGap * scale;
+    const scaledMargin = baseMargin * scale;
+
+    document.documentElement.style.setProperty('--icon-size', `${scaledIconSize}px`);
+    document.documentElement.style.setProperty('--card-size', `${scaledCardSize}px`);
+    document.documentElement.style.setProperty('--gap-size', `${scaledGap}px`);
+    document.documentElement.style.setProperty('--icon-margin', `${scaledMargin}px`);
+
+    // 计算网格最大宽度以控制每行数量
+    const maxWidth = (scaledCardSize * columns) + (scaledGap * (columns - 1));
+    grid.style.maxWidth = `${maxWidth}px`;
   }
 
   // 设置事件监听
@@ -265,18 +282,305 @@ class SpeedDial {
     // 隐藏右键菜单
     document.addEventListener('click', () => this.hideContextMenu());
 
-    // 设置按钮
+    // 设置按钮 - 打开设置弹窗
     document.getElementById('settingsBtn').addEventListener('click', () => {
-      chrome.runtime.openOptionsPage();
+      this.openSettingsModal();
     });
+
+    // 设置弹窗相关
+    this.setupSettingsModalListeners();
 
     // 键盘快捷键
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         this.closeModal();
+        this.closeSettingsModal();
         this.hideContextMenu();
       }
     });
+  }
+
+  // 设置弹窗事件监听
+  setupSettingsModalListeners() {
+    // 关闭按钮
+    document.getElementById('settingsClose').addEventListener('click', () => {
+      this.closeSettingsModal();
+    });
+
+    // 点击弹窗外部关闭
+    document.getElementById('settingsModal').addEventListener('click', (e) => {
+      if (e.target.id === 'settingsModal') this.closeSettingsModal();
+    });
+
+    // 导航切换
+    document.querySelectorAll('.settings-nav-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        const section = item.getAttribute('data-section');
+        this.switchSettingsSection(section);
+      });
+    });
+
+    // 图标缩放滑块
+    document.getElementById('iconScaleSettings').addEventListener('input', (e) => {
+      const value = parseFloat(e.target.value);
+      document.getElementById('scaleValue').textContent = `${value}x`;
+    });
+
+    // 语言选择变化时实时预览
+    document.getElementById('languageSettings').addEventListener('change', (e) => {
+      i18n.setLanguage(e.target.value);
+      this.applyI18n();
+    });
+
+    // 保存设置按钮
+    document.getElementById('saveSettingsBtn').addEventListener('click', () => {
+      this.saveSettingsFromModal();
+    });
+
+    // 导出配置
+    document.getElementById('exportBtnSettings').addEventListener('click', () => {
+      this.exportData();
+    });
+
+    // 导入配置
+    document.getElementById('importBtnSettings').addEventListener('click', () => {
+      document.getElementById('importFileSettings').click();
+    });
+
+    document.getElementById('importFileSettings').addEventListener('change', (e) => {
+      this.importData(e.target.files[0]);
+    });
+
+    // 重置数据
+    document.getElementById('resetBtnSettings').addEventListener('click', () => {
+      this.resetData();
+    });
+
+    // 检查同步状态
+    document.getElementById('checkSyncBtnSettings').addEventListener('click', () => {
+      this.checkSyncStatus();
+    });
+  }
+
+  // 打开设置弹窗
+  openSettingsModal() {
+    const modal = document.getElementById('settingsModal');
+
+    // 填充当前设置
+    document.getElementById('columnsSettings').value = this.settings.columns || 6;
+    document.getElementById('iconScaleSettings').value = this.settings.iconScale || 1.5;
+    document.getElementById('scaleValue').textContent = `${this.settings.iconScale || 1.5}x`;
+    document.getElementById('languageSettings').value = this.settings.language || i18n.getLanguage();
+
+    // 检查同步状态
+    this.checkSyncStatus();
+
+    modal.classList.remove('hidden');
+  }
+
+  // 关闭设置弹窗
+  closeSettingsModal() {
+    document.getElementById('settingsModal').classList.add('hidden');
+  }
+
+  // 切换设置分区
+  switchSettingsSection(sectionName) {
+    // 更新导航
+    document.querySelectorAll('.settings-nav-item').forEach(item => {
+      item.classList.toggle('active', item.getAttribute('data-section') === sectionName);
+    });
+
+    // 更新内容
+    document.querySelectorAll('.settings-section').forEach(section => {
+      section.classList.toggle('active', section.getAttribute('data-section') === sectionName);
+    });
+  }
+
+  // 从弹窗保存设置
+  async saveSettingsFromModal() {
+    this.settings.columns = parseInt(document.getElementById('columnsSettings').value);
+    this.settings.iconScale = parseFloat(document.getElementById('iconScaleSettings').value);
+    this.settings.language = document.getElementById('languageSettings').value;
+
+    await this.saveData();
+
+    // 应用设置
+    i18n.setLanguage(this.settings.language);
+    this.applyI18n();
+    this.applySettings();
+    this.renderDials();
+
+    // 关闭弹窗
+    this.closeSettingsModal();
+  }
+
+  // 导出数据
+  async exportData() {
+    const data = await new Promise((resolve) => {
+      chrome.storage.sync.get(null, resolve);
+    });
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `speed-dial-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  // 导入数据
+  importData(file) {
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const data = JSON.parse(e.target.result);
+
+        // 检查数据大小
+        const dataSize = new Blob([JSON.stringify(data)]).size;
+        if (dataSize > 102400) {
+          alert(i18n.t('importDataTooLarge'));
+        }
+
+        await new Promise((resolve) => {
+          chrome.storage.sync.set(data, () => {
+            if (chrome.runtime.lastError) {
+              // 同步失败，尝试保存到本地
+              chrome.storage.local.set(data, () => {
+                alert(i18n.t('savedToLocal'));
+                resolve();
+              });
+            } else {
+              // 同时保存到本地
+              chrome.storage.local.set(data, resolve);
+            }
+          });
+        });
+
+        // 重新加载数据
+        await this.loadData();
+
+        // 更新设置弹窗表单
+        document.getElementById('columnsSettings').value = this.settings.columns || 6;
+        document.getElementById('iconScaleSettings').value = this.settings.iconScale || 1.5;
+        document.getElementById('scaleValue').textContent = `${this.settings.iconScale || 1.5}x`;
+        document.getElementById('languageSettings').value = this.settings.language || i18n.getLanguage();
+
+        // 应用设置
+        i18n.setLanguage(this.settings.language);
+        this.applyI18n();
+        this.applySettings();
+        this.renderDials();
+
+        // 关闭弹窗
+        this.closeSettingsModal();
+      } catch (err) {
+        alert(i18n.t('importFailed'));
+        console.error('Import error:', err);
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // 重置数据
+  async resetData() {
+    if (confirm(i18n.t('confirmReset'))) {
+      await new Promise((resolve) => {
+        chrome.storage.sync.clear(resolve);
+      });
+      await new Promise((resolve) => {
+        chrome.storage.local.clear(resolve);
+      });
+
+      // 重置为默认设置
+      this.settings = {
+        columns: 4,
+        language: 'zh-CN',
+        iconScale: 1.5
+      };
+
+      // 重置为默认快捷方式
+      this.dials = [
+        { name: 'Google', url: 'https://www.google.com', icon: '' },
+        { name: 'YouTube', url: 'https://www.youtube.com', icon: '' },
+        { name: 'GitHub', url: 'https://www.github.com', icon: '' },
+        { name: 'Twitter', url: 'https://www.twitter.com', icon: '' }
+      ];
+
+      // 应用设置
+      i18n.setLanguage(this.settings.language);
+      this.applyI18n();
+      this.applySettings();
+      this.renderDials();
+
+      // 关闭弹窗
+      this.closeSettingsModal();
+    }
+  }
+
+  // 检查同步状态
+  async checkSyncStatus() {
+    const SYNC_QUOTA_BYTES = 102400; // 100KB
+    const SYNC_QUOTA_BYTES_PER_ITEM = 8192; // 8KB
+
+    // 获取同步存储使用量
+    chrome.storage.sync.getBytesInUse(null, (syncBytes) => {
+      const syncUsageEl = document.getElementById('syncUsageSettings');
+      if (chrome.runtime.lastError) {
+        syncUsageEl.textContent = i18n.t('getFailed');
+        syncUsageEl.style.color = '#ff6b6b';
+      } else {
+        const percentage = ((syncBytes / SYNC_QUOTA_BYTES) * 100).toFixed(1);
+        syncUsageEl.textContent = `${(syncBytes / 1024).toFixed(2)} KB / 100 KB (${percentage}%)`;
+        syncUsageEl.style.color = syncBytes > SYNC_QUOTA_BYTES * 0.8 ? '#ff6b6b' : '#4CAF50';
+      }
+    });
+
+    // 获取本地存储使用量
+    chrome.storage.local.getBytesInUse(null, (localBytes) => {
+      const localUsageEl = document.getElementById('localUsageSettings');
+      if (chrome.runtime.lastError) {
+        localUsageEl.textContent = i18n.t('getFailed');
+      } else {
+        localUsageEl.textContent = `${(localBytes / 1024).toFixed(2)} KB`;
+      }
+    });
+
+    // 检查同步数据完整性
+    const syncData = await new Promise((resolve) => {
+      chrome.storage.sync.get(null, (result) => {
+        if (chrome.runtime.lastError) {
+          resolve(null);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+
+    const statusEl = document.getElementById('syncStatusTextSettings');
+    if (syncData === null) {
+      statusEl.textContent = `❌ ${i18n.t('syncAccessFailed')}`;
+      statusEl.style.color = '#ff6b6b';
+    } else if (syncData.dials) {
+      // 检查 dials 数据大小
+      const dialsSize = new Blob([JSON.stringify(syncData.dials)]).size;
+      if (dialsSize > SYNC_QUOTA_BYTES_PER_ITEM) {
+        statusEl.textContent = `⚠️ ${i18n.t('dataTooLarge')} (${(dialsSize/1024).toFixed(1)}KB > 8KB), ${i18n.t('cannotSync')}`;
+        statusEl.style.color = '#ff9800';
+      } else {
+        statusEl.textContent = `✅ ${i18n.t('syncNormal')} (${syncData.dials.length} ${i18n.t('shortcutsSynced')})`;
+        statusEl.style.color = '#4CAF50';
+      }
+    } else {
+      statusEl.textContent = `⚠️ ${i18n.t('noSyncData')}`;
+      statusEl.style.color = '#ff9800';
+    }
   }
 
   // 打开弹窗
