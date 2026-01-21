@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "My Speed Dial",
+  "version": "1.0.0",
+  "description": "简洁高效的新标签页快速拨号",
+  "permissions": ["storage", "topSites", "favicon"],
+  "chrome_url_overrides": {
+    "newtab": "newtab.html"
+  },
+  "icons": {
+    "16": "icons/icon16.svg",
+    "48": "icons/icon48.svg",
+    "128": "icons/icon128.svg"
+  },
+  "options_page": "options.html",
+  "action": {
+    "default_icon": {
+      "16": "icons/icon16.svg",
+      "48": "icons/icon48.svg"
+    },
+    "default_title": "My Speed Dial 设置"
+  }
+}
