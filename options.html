@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Speed Dial Settings</title>
+  <title>fast-access Settings</title>
   <link rel="stylesheet" href="options.css">
 </head>
 <body>
@@ -17,7 +17,7 @@
           <rect x="6" y="26" width="16" height="16" rx="3" fill="white" opacity="0.7"/>
           <rect x="26" y="26" width="16" height="16" rx="3" fill="white" opacity="0.5"/>
         </svg>
-        <span data-i18n="settingsTitle">My Speed Dial Settings</span>
+        <span data-i18n="settingsTitle">fast-access Settings</span>
       </h1>
     </header>
 
@@ -54,6 +54,7 @@
       <!-- 数据管理 -->
       <section class="settings-section">
         <h2 data-i18n="dataManagement">Data Management</h2>
+        <p class="data-desc" data-i18n="dataManagementDesc">导出/导入用于备份或恢复您的设置；重置将清除所有设置并恢复为默认值。请在操作前确认已备份重要配置。</p>
         <div class="setting-item buttons">
           <button id="exportBtn" class="btn btn-secondary">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
@@ -74,12 +75,12 @@
           <input type="file" id="importFile" accept=".json" hidden>
         </div>
         <div class="setting-item">
-          <button id="resetBtn" class="btn btn-danger">
+          <button id="resetBtn" class="btn btn-secondary reset-btn">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
               <polyline points="3 6 5 6 21 6"></polyline>
               <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
             </svg>
-            <span data-i18n="resetAll">Reset All</span>
+            <span class="btn-label" data-i18n="resetAll">Reset All</span>
           </button>
         </div>
       </section>
@@ -124,7 +125,7 @@
       <section class="settings-section">
         <h2 data-i18n="about">About</h2>
         <div class="about-info">
-          <p><strong>My Speed Dial</strong> v1.2.0</p>
+          <p><strong>fast-access</strong> v1.2.0</p>
           <p data-i18n="description">A clean and efficient new tab speed dial extension</p>
           <div class="changelog">
             <p class="changelog-title" data-i18n="v120Changes">v1.2.0 Changes:</p>
@@ -144,7 +145,7 @@
     </main>
 
     <footer>
-      <button id="saveBtn" class="btn btn-primary" data-i18n="saveSettings">Save Settings</button>
+      <button id="saveBtn" class="btn btn-secondary save-btn"><span class="btn-label" data-i18n="saveSettings">Save Settings</span></button>
       <span id="saveStatus" class="save-status"></span>
     </footer>
   </div>

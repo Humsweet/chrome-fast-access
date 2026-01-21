@@ -10,6 +10,7 @@
   --text-color: #37352f;
   --text-secondary: #6b6b6b;
   --accent-color: #2383e2;
+  --success-color: #2ea44f;
   --border-color: rgba(55, 53, 47, 0.09);
   --danger-color: #e03e3e;
 }
@@ -83,6 +84,12 @@ header h1 {
 .setting-item.buttons {
   gap: 8px;
   flex-wrap: wrap;
+}
+
+.data-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 6px 0 10px 0;
 }
 
 /* 选择框 */
@@ -269,7 +276,9 @@ footer {
 
 .save-status {
   font-size: 13px;
-  color: white;
+  color: var(--text-color);
+  background: rgba(55, 53, 47, 0.04);
+  border: 1px solid var(--border-color);
   opacity: 0;
   transition: opacity 0.3s;
   padding: 5px 10px;
@@ -316,6 +325,32 @@ footer {
   flex-shrink: 0;
   margin-top: 1px;
   color: var(--accent-color);
+}
+
+/* Specific button label color overrides so icons keep default color */
+.reset-btn svg,
+.save-btn svg {
+  color: var(--text-color);
+}
+.reset-btn .btn-label {
+  color: var(--danger-color);
+  font-weight: 500;
+}
+.save-btn .btn-label {
+  color: var(--accent-color);
+  font-weight: 500;
+}
+
+.save-status.show {
+  opacity: 1;
+}
+
+.save-status.success {
+  color: var(--success-color);
+}
+
+.save-status.error {
+  color: var(--danger-color);
 }
 
 /* 响应式 */

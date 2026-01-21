@@ -1,10 +1,15 @@
 {
   "appName": {
-    "message": "My Speed Dial",
+    "message": "fast-access",
     "description": "The name of the extension"
   },
   "appDescription": {
     "message": "A clean and efficient new tab speed dial extension. Customize your shortcuts and enjoy a minimalist browsing experience.",
     "description": "The description of the extension"
+  }
+  ,
+  "dataManagementDesc": {
+    "message": "Export/Import lets you backup or restore your settings. Reset will clear all settings and restore defaults — please backup important data before proceeding.",
+    "description": "Short description shown under Data Management explaining export/import/reset"
   }
 }

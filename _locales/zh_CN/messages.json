@@ -1,10 +1,15 @@
 {
   "appName": {
-    "message": "My Speed Dial",
+    "message": "fast-access",
     "description": "扩展名称"
   },
   "appDescription": {
     "message": "简洁高效的新标签页快速拨号扩展。自定义快捷方式，享受极简浏览体验。",
     "description": "扩展描述"
+  }
+  ,
+  "dataManagementDesc": {
+    "message": "导出/导入用于备份或恢复您的设置；重置将清除所有设置并恢复为默认值。请在操作前确认已备份重要配置。",
+    "description": "数据管理下的简短说明，解释导出/导入/重置功能"
   }
 }

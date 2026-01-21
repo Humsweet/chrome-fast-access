@@ -33,7 +33,7 @@ const manifest = JSON.parse(fs.readFileSync(path.join(rootDir, 'manifest.json'),
 const version = manifest.version;
 
 async function build() {
-  console.log(`\n🚀 开始构建 My Speed Dial v${version}...\n`);
+  console.log(`\n🚀 开始构建 fast-access v${version}...\n`);
 
   // 确保 dist 目录存在
   if (!fs.existsSync(distDir)) {
@@ -57,7 +57,7 @@ async function build() {
     }
   }
 
-  const zipFileName = `my-speed-dial-v${version}.zip`;
+  const zipFileName = `fast-access-v${version}.zip`;
   const zipPath = path.join(distDir, zipFileName);
 
   // 如果已存在同名文件，删除它

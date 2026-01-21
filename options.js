@@ -1,5 +1,5 @@
 /**
- * My Speed Dial - 设置页面逻辑
+ * fast-access - 设置页面逻辑
  */
 
 class OptionsPage {
@@ -91,10 +91,15 @@ class OptionsPage {
   showSaveStatus(message, isError = false) {
     const status = document.getElementById('saveStatus');
     status.textContent = message;
-    status.style.background = isError ? '#ff6b6b' : '#4CAF50';
+    status.classList.remove('success', 'error');
+    if (isError) {
+      status.classList.add('error');
+    } else {
+      status.classList.add('success');
+    }
     status.classList.add('show');
     setTimeout(() => {
-      status.classList.remove('show');
+      status.classList.remove('show', 'success', 'error');
     }, isError ? 5000 : 3000);
   }
 

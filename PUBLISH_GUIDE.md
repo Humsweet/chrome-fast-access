@@ -1,6 +1,6 @@
 # Chrome Web Store 发布指南
 
-本文档将引导您完成将 **My Speed Dial** 扩展发布到 Chrome Web Store 的完整流程。
+本文档将引导您完成将 **fast-access** 扩展发布到 Chrome Web Store 的完整流程。
 
 ---
 
@@ -113,24 +113,24 @@ npm run build
 
 成功后会看到：
 ```
-🚀 开始构建 My Speed Dial v1.0.0...
+🚀 开始构建 fast-access v1.0.0...
 
-  ✓ manifest.json
-  ✓ newtab.html
-  ✓ newtab.css
-  ✓ newtab.js
-  ✓ options.html
-  ✓ options.css
-  ✓ options.js
-  ✓ icons/
-  ✓ _locales/
+   ✓ manifest.json
+   ✓ newtab.html
+   ✓ newtab.css
+   ✓ newtab.js
+   ✓ options.html
+   ✓ options.css
+   ✓ options.js
+   ✓ icons/
+   ✓ _locales/
 
 ✅ 构建完成！
-📦 输出文件: dist/my-speed-dial-v1.0.0.zip
+📦 输出文件: dist/fast-access-v1.0.0.zip
 📏 文件大小: XX.XX KB
 ```
 
-生成的 ZIP 文件位于 `dist/my-speed-dial-v1.0.0.zip`
+生成的 ZIP 文件位于 `dist/fast-access-v1.0.0.zip`
 
 ---
 
@@ -190,7 +190,7 @@ npm run build
 
 ### 5.2 上传 ZIP 文件
 
-1. 将 `dist/my-speed-dial-v1.0.0.zip` 文件拖拽到上传区域
+1. 将 `dist/fast-access-v1.0.0.zip` 文件拖拽到上传区域
    
    或点击 **"选择文件"** 手动选择
 
@@ -213,7 +213,7 @@ npm run build
 #### 商品名称
 
 ```
-My Speed Dial
+fast-access
 ```
 
 #### 简短描述（最多 132 字符）
@@ -232,7 +232,7 @@ A clean and efficient new tab speed dial. Customize your shortcuts for quick acc
 
 英文版本：
 ```
-My Speed Dial transforms your new tab page into a beautiful and efficient speed dial.
+fast-access transforms your new tab page into a beautiful and efficient speed dial.
 
 ✨ FEATURES:
 
@@ -261,7 +261,7 @@ Perfect for users who want a fast, clean new tab experience without unnecessary 
 
 中文版本：
 ```
-My Speed Dial 将您的新标签页转变为美观高效的快速拨号界面。
+fast-access 将您的新标签页转变为美观高效的快速拨号界面。
 
 ✨ 功能特点：
 

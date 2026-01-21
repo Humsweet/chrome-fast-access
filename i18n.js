@@ -1,6 +1,6 @@
 /**
- * My Speed Dial - 国际化模块
- * 支持 5 种语言：英语、简体中文、繁体中文、日语、西班牙语
+ * fast-access - 国际化模块
+ * 支持 5 种语言：英语、简体中文、繁體中文、日语、西班牙语
  */
 
 const i18n = {
@@ -29,7 +29,7 @@ const i18n = {
       confirmDelete: 'Are you sure you want to delete this shortcut?',
 
       // 设置页面
-      settingsTitle: 'My Speed Dial Settings',
+      settingsTitle: 'fast-access Settings',
       displaySettings: 'Display Settings',
       columnsPerRow: 'Items per row',
       items: 'items',
@@ -99,7 +99,7 @@ const i18n = {
       confirmDelete: '确定要删除这个快捷方式吗？',
 
       // 设置页面
-      settingsTitle: 'My Speed Dial 设置',
+      settingsTitle: 'fast-access 设置',
       displaySettings: '显示设置',
       columnsPerRow: '每行显示数量',
       items: '个',
@@ -169,7 +169,7 @@ const i18n = {
       confirmDelete: '確定要刪除這個捷徑嗎？',
 
       // 设置页面
-      settingsTitle: 'My Speed Dial 設定',
+      settingsTitle: 'fast-access 設定',
       displaySettings: '顯示設定',
       columnsPerRow: '每列顯示數量',
       items: '個',
@@ -239,7 +239,7 @@ const i18n = {
       confirmDelete: 'このショートカットを削除してもよろしいですか？',
 
       // 设置页面
-      settingsTitle: 'My Speed Dial 設定',
+      settingsTitle: 'fast-access 設定',
       displaySettings: '表示設定',
       columnsPerRow: '1行あたりの表示数',
       items: '個',
@@ -309,7 +309,7 @@ const i18n = {
       confirmDelete: '¿Estás seguro de que quieres eliminar este acceso directo?',
 
       // 设置页面
-      settingsTitle: 'Configuración de My Speed Dial',
+      settingsTitle: 'Configuración de fast-access',
       displaySettings: 'Configuración de visualización',
       columnsPerRow: 'Elementos por fila',
       items: '',

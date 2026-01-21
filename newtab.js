@@ -1,5 +1,5 @@
 /**
- * My Speed Dial - 新标签页主逻辑
+ * fast-access - 新标签页主逻辑
  * 使用 Chrome Storage Sync API 同步配置
  */
 
