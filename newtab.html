@@ -32,9 +32,36 @@
             <input type="url" id="dialUrl" data-i18n-placeholder="urlPlaceholder" placeholder="https://www.google.com">
           </div>
           <div class="form-group">
-            <label for="dialIcon" data-i18n="iconLabel">Icon (Optional, SVG code only)</label>
-            <textarea id="dialIcon" data-i18n-placeholder="iconPlaceholder" placeholder="Paste SVG code, leave empty to use default icon"></textarea>
+            <label data-i18n="iconLabel">Icon (Optional, SVG code only)</label>
+            <div class="icon-buttons-row">
+              <button type="button" id="pasteIconBtn" class="btn btn-secondary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                  <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                </svg>
+                <span data-i18n="pasteSvgCode">Paste SVG Code</span>
+              </button>
+              <button type="button" id="uploadIconBtn" class="btn btn-secondary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <span data-i18n="uploadSvgFile">Upload SVG File</span>
+              </button>
+              <input type="file" id="iconFileInput" accept=".svg" hidden>
+            </div>
+            <div id="iconPreview" class="icon-preview hidden">
+              <div class="icon-preview-display"></div>
+              <button type="button" id="clearIconBtn" class="icon-preview-clear" title="Clear icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
             <small class="form-hint"><span data-i18n="iconHint">Tip: Get brand SVG icons from</span> <a href="https://simpleicons.org/" target="_blank">Simple Icons</a></small>
+            <input type="hidden" id="dialIcon" value="">
           </div>
         </div>
         <div class="modal-footer">
@@ -205,13 +232,23 @@
           <div class="settings-section" data-section="about">
             <h3 data-i18n="about">About</h3>
             <div class="about-info-settings">
-              <p><strong>fast-access</strong> v1.3.0</p>
+              <p><strong>fast-access</strong> v1.5.1</p>
               <p data-i18n="description">A clean and efficient new tab speed dial extension</p>
               <div class="changelog">
-                <p><strong data-i18n="v130Changes">v1.3.0 Changes:</strong></p>
+                <p><strong data-i18n="v151Changes">v1.5.1 Changes:</strong></p>
                 <ul>
-                  <li data-i18n="v130Change1">Support importing Speed Dial 2 configuration files</li>
-                  <li data-i18n="v130Change2">Improved data management interface</li>
+                  <li data-i18n="v151Change1">Add SVG file upload feature for icons</li>
+                  <li data-i18n="v151Change2">Icon preview when adding/editing shortcuts</li>
+                </ul>
+                <p><strong data-i18n="v150Changes">v1.5.0 Changes:</strong></p>
+                <ul>
+                  <li data-i18n="v150Change1">Data chunking for Chrome Sync, breaks 8KB per-item limit</li>
+                  <li data-i18n="v150Change2">Support 100+ shortcuts with SVG icons</li>
+                </ul>
+                <p><strong data-i18n="v140Changes">v1.4.0 Changes:</strong></p>
+                <ul>
+                  <li data-i18n="v140Change1">Import dialog now uses in-page modal instead of browser alert</li>
+                  <li data-i18n="v140Change2">Enhanced drag-and-drop with Notion-style visual feedback</li>
                 </ul>
               </div>
             </div>
@@ -221,6 +258,56 @@
           <div class="settings-footer">
             <button id="saveSettingsBtn" class="btn btn-dark" data-i18n="saveSettings">Save Settings</button>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 导入选项弹窗 -->
+    <div id="importModal" class="modal hidden">
+      <div class="modal-content import-modal-content">
+        <div class="modal-header">
+          <h3 id="importModalTitle" data-i18n="speedDial2Detected">Speed Dial 2 configuration detected</h3>
+          <button id="importModalClose" class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body import-modal-body">
+          <p class="import-count" id="importCount"></p>
+        </div>
+        <div class="modal-footer import-modal-footer">
+          <button id="importAddBtn" class="btn btn-secondary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span data-i18n="addToExisting">Add to existing</span>
+          </button>
+          <button id="importReplaceBtn" class="btn btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+              <polyline points="17 1 21 5 17 9"></polyline>
+              <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+              <polyline points="7 23 3 19 7 15"></polyline>
+              <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+            </svg>
+            <span data-i18n="replaceAll">Replace all</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 粘贴 SVG 代码弹窗 -->
+    <div id="pasteSvgModal" class="modal hidden">
+      <div class="modal-content paste-svg-modal-content">
+        <div class="modal-header">
+          <h3 data-i18n="pasteSvgCode">Paste SVG Code</h3>
+          <button id="pasteSvgModalClose" class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <textarea id="svgCodeInput" data-i18n-placeholder="iconPlaceholder" placeholder="Paste SVG code here..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="pasteSvgCancel" class="btn btn-secondary" data-i18n="cancel">Cancel</button>
+          <button id="pasteSvgConfirm" class="btn btn-primary" data-i18n="confirm">Confirm</button>
         </div>
       </div>
     </div>

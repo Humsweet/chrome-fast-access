@@ -54,7 +54,8 @@ class SpeedDial {
   // 加载数据
   async loadData() {
     return new Promise((resolve) => {
-      chrome.storage.sync.get(['dials', 'settings'], (result) => {
+      // 获取所有同步数据（包括分片）
+      chrome.storage.sync.get(null, async (result) => {
         if (chrome.runtime.lastError) {
           console.error('加载同步数据失败:', chrome.runtime.lastError.message);
           // 尝试从本地存储加载
@@ -64,25 +65,17 @@ class SpeedDial {
           });
           return;
         }
-        this.loadFromResult(result);
+        await this.loadFromResult(result);
         resolve();
       });
     });
   }
 
   // 从结果加载数据
-  loadFromResult(result) {
-    if (result.dials) {
-      this.dials = result.dials;
-    } else {
-      // 默认快捷方式
-      this.dials = [
-        { name: 'Google', url: 'https://www.google.com', icon: '' },
-        { name: 'YouTube', url: 'https://www.youtube.com', icon: '' },
-        { name: 'GitHub', url: 'https://www.github.com', icon: '' },
-        { name: 'Twitter', url: 'https://www.twitter.com', icon: '' }
-      ];
-    }
+  async loadFromResult(result) {
+    // 支持分片格式和旧格式
+    this.dials = await this.loadDialsFromChunks(result);
+
     if (result.settings) {
       this.settings = { ...this.settings, ...result.settings };
     }
@@ -90,40 +83,46 @@ class SpeedDial {
 
   // 保存数据
   async saveData() {
-    const data = {
+    const SYNC_QUOTA_BYTES = 102400; // 100KB
+
+    // 估算总数据大小
+    const estimatedSize = new Blob([JSON.stringify({
       dials: this.dials,
       settings: this.settings
-    };
+    })]).size;
 
-    // 检查数据大小
-    const dataSize = new Blob([JSON.stringify(data)]).size;
-    const SYNC_QUOTA_BYTES = 102400; // 100KB
-    const SYNC_QUOTA_BYTES_PER_ITEM = 8192; // 8KB
-
-    // 检查单项大小
-    const dialsSize = new Blob([JSON.stringify(this.dials)]).size;
-    if (dialsSize > SYNC_QUOTA_BYTES_PER_ITEM) {
-      console.warn(`快捷方式数据 (${(dialsSize/1024).toFixed(1)}KB) 超出同步限制 (8KB)，将仅保存到本地`);
+    // 检查总容量（留 10KB 给 settings 等）
+    if (estimatedSize > SYNC_QUOTA_BYTES - 10240) {
+      console.warn(`总数据 (${(estimatedSize/1024).toFixed(1)}KB) 超出同步限制 (90KB)，将仅保存到本地`);
       this.showSyncWarning('数据过大，仅保存到本地。请减少快捷方式数量或简化 SVG 图标。');
-      return this.saveToLocalOnly(data);
+      return this.saveToLocalOnly({
+        dials: this.dials,
+        settings: this.settings
+      });
     }
 
-    return new Promise((resolve) => {
-      chrome.storage.sync.set(data, () => {
-        if (chrome.runtime.lastError) {
-          console.error('同步保存失败:', chrome.runtime.lastError.message);
-          this.showSyncWarning('同步失败: ' + chrome.runtime.lastError.message);
-          // 回退到本地存储
-          this.saveToLocalOnly(data).then(resolve);
-        } else {
-          // 同时保存到本地作为备份
-          chrome.storage.local.set(data, () => {
-            console.log('数据已同步保存');
-            resolve();
-          });
-        }
+    try {
+      // 使用分片存储
+      await this.saveDialsInChunks(this.dials);
+
+      // 同时保存到本地作为备份
+      await new Promise((resolve) => {
+        chrome.storage.local.set({
+          dials: this.dials,
+          settings: this.settings
+        }, resolve);
       });
-    });
+
+      console.log('数据已分片同步保存');
+    } catch (error) {
+      console.error('同步保存失败:', error.message);
+      this.showSyncWarning('同步失败: ' + error.message);
+      // 回退到本地存储
+      await this.saveToLocalOnly({
+        dials: this.dials,
+        settings: this.settings
+      });
+    }
   }
 
   // 仅保存到本地存储
@@ -136,6 +135,33 @@ class SpeedDial {
         resolve();
       });
     });
+  }
+
+  // 显示导入成功提示
+  showImportSuccess(count) {
+    let toast = document.getElementById('importToast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'importToast';
+      toast.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #37352f;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 14px;
+        z-index: 10000;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        animation: slideDown 0.3s ease;
+      `;
+      document.body.appendChild(toast);
+    }
+    toast.textContent = `${count} ${i18n.t('importedCount')}`;
+    toast.style.display = 'block';
+    setTimeout(() => toast.remove(), 3000);
   }
 
   // 显示同步警告
@@ -213,6 +239,7 @@ class SpeedDial {
     // 拖拽事件
     el.addEventListener('dragstart', (e) => this.handleDragStart(e, index));
     el.addEventListener('dragover', (e) => this.handleDragOver(e));
+    el.addEventListener('dragleave', (e) => this.handleDragLeave(e));
     el.addEventListener('drop', (e) => this.handleDrop(e, index));
     el.addEventListener('dragend', () => this.handleDragEnd());
 
@@ -283,6 +310,12 @@ class SpeedDial {
       if (e.target.id === 'modal') this.closeModal();
     });
 
+    // 图标按钮相关
+    this.setupIconButtonListeners();
+
+    // 拖拽文件上传
+    this.setupDragDropUpload();
+
     // 隐藏右键菜单
     document.addEventListener('click', () => this.hideContextMenu());
 
@@ -299,9 +332,279 @@ class SpeedDial {
       if (e.key === 'Escape') {
         this.closeModal();
         this.closeSettingsModal();
+        this.closePasteSvgModal();
+        this.hideDragOverlay();
         this.hideContextMenu();
       }
     });
+  }
+
+  // 设置图标按钮事件监听
+  setupIconButtonListeners() {
+    // 粘贴 SVG 代码按钮
+    document.getElementById('pasteIconBtn').addEventListener('click', () => {
+      this.openPasteSvgModal();
+    });
+
+    // 上传 SVG 文件按钮
+    document.getElementById('uploadIconBtn').addEventListener('click', () => {
+      document.getElementById('iconFileInput').click();
+    });
+
+    // 文件选择变化
+    document.getElementById('iconFileInput').addEventListener('change', (e) => {
+      this.handleIconFileUpload(e.target.files[0]);
+    });
+
+    // 清除图标按钮
+    document.getElementById('clearIconBtn').addEventListener('click', () => {
+      this.clearIconPreview();
+    });
+
+    // 粘贴 SVG 弹窗相关
+    document.getElementById('pasteSvgModalClose').addEventListener('click', () => {
+      this.closePasteSvgModal();
+    });
+    document.getElementById('pasteSvgCancel').addEventListener('click', () => {
+      this.closePasteSvgModal();
+    });
+    document.getElementById('pasteSvgConfirm').addEventListener('click', () => {
+      this.confirmPasteSvg();
+    });
+    document.getElementById('pasteSvgModal').addEventListener('click', (e) => {
+      if (e.target.id === 'pasteSvgModal') this.closePasteSvgModal();
+    });
+  }
+
+  // 打开粘贴 SVG 弹窗
+  openPasteSvgModal() {
+    const modal = document.getElementById('pasteSvgModal');
+    const textarea = document.getElementById('svgCodeInput');
+    const currentIcon = document.getElementById('dialIcon').value;
+    textarea.value = currentIcon;
+    modal.classList.remove('hidden');
+    textarea.focus();
+  }
+
+  // 关闭粘贴 SVG 弹窗
+  closePasteSvgModal() {
+    document.getElementById('pasteSvgModal').classList.add('hidden');
+  }
+
+  // 确认粘贴 SVG
+  confirmPasteSvg() {
+    const rawInput = document.getElementById('svgCodeInput').value.trim();
+
+    if (rawInput) {
+      if (!this.isValidSvg(rawInput)) {
+        alert(i18n.t('invalidIcon'));
+        return;
+      }
+
+      // 提取纯 SVG 代码
+      const svgCode = this.extractSvgCode(rawInput);
+
+      // 检查 SVG 大小
+      const sizeWarning = this.checkSvgSize(svgCode);
+      if (sizeWarning) {
+        alert(sizeWarning);
+        return;
+      }
+
+      this.setIconValue(svgCode);
+    } else {
+      this.clearIconPreview();
+    }
+
+    this.closePasteSvgModal();
+  }
+
+  // 处理上传的 SVG 文件
+  handleIconFileUpload(file) {
+    if (!file) return;
+
+    // 检查文件类型
+    if (!file.name.toLowerCase().endsWith('.svg')) {
+      alert(i18n.t('invalidSvgFile'));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const rawContent = e.target.result;
+
+      if (!this.isValidSvg(rawContent)) {
+        alert(i18n.t('invalidIcon'));
+        return;
+      }
+
+      // 提取纯 SVG 代码
+      const svgCode = this.extractSvgCode(rawContent);
+
+      // 检查 SVG 大小
+      const sizeWarning = this.checkSvgSize(svgCode);
+      if (sizeWarning) {
+        alert(sizeWarning);
+        return;
+      }
+
+      this.setIconValue(svgCode);
+    };
+    reader.readAsText(file);
+
+    // 重置文件输入，允许再次选择同一文件
+    document.getElementById('iconFileInput').value = '';
+  }
+
+  // 检查 SVG 大小
+  checkSvgSize(svgCode) {
+    const size = new Blob([svgCode]).size;
+    // Chrome sync 单项限制 8KB，但我们使用分片，总限制 100KB
+    // 单个 SVG 建议不超过 7KB（留给分片元数据的空间）
+    const MAX_SINGLE_SVG_SIZE = 7168; // 7KB
+
+    if (size > MAX_SINGLE_SVG_SIZE) {
+      return i18n.t('svgTooLarge').replace('{size}', (size / 1024).toFixed(1));
+    }
+    return null;
+  }
+
+  // 设置图标值并显示预览
+  setIconValue(svgCode) {
+    document.getElementById('dialIcon').value = svgCode;
+    this.showIconPreview(svgCode);
+  }
+
+  // 显示图标预览
+  showIconPreview(svgCode) {
+    const preview = document.getElementById('iconPreview');
+    const display = preview.querySelector('.icon-preview-display');
+    display.innerHTML = svgCode;
+    preview.classList.remove('hidden');
+  }
+
+  // 清除图标预览
+  clearIconPreview() {
+    document.getElementById('dialIcon').value = '';
+    const preview = document.getElementById('iconPreview');
+    const display = preview.querySelector('.icon-preview-display');
+    display.innerHTML = '';
+    preview.classList.add('hidden');
+  }
+
+  // 设置拖拽文件上传
+  setupDragDropUpload() {
+    let dragCounter = 0;
+
+    // 阻止默认拖拽行为
+    document.addEventListener('dragenter', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+
+    document.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+
+    document.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+
+    document.addEventListener('drop', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+
+    // 页面级拖拽监听
+    document.body.addEventListener('dragenter', (e) => {
+      // 只处理文件拖拽
+      if (!e.dataTransfer.types.includes('Files')) return;
+
+      dragCounter++;
+      if (dragCounter === 1) {
+        this.showDragOverlay();
+      }
+    });
+
+    document.body.addEventListener('dragleave', (e) => {
+      dragCounter--;
+      if (dragCounter === 0) {
+        this.hideDragOverlay();
+      }
+    });
+
+    document.body.addEventListener('drop', (e) => {
+      dragCounter = 0;
+      this.hideDragOverlay();
+
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        const file = files[0];
+        if (file.name.toLowerCase().endsWith('.svg')) {
+          this.handleDragDropSvg(file);
+        }
+      }
+    });
+  }
+
+  // 显示拖拽覆盖层
+  showDragOverlay() {
+    let overlay = document.getElementById('dragOverlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'dragOverlay';
+      overlay.className = 'drag-overlay';
+      overlay.innerHTML = `
+        <div class="drag-overlay-content">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="48" height="48">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <p data-i18n="dropSvgHere">${i18n.t('dropSvgHere')}</p>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+    }
+    overlay.classList.add('active');
+  }
+
+  // 隐藏拖拽覆盖层
+  hideDragOverlay() {
+    const overlay = document.getElementById('dragOverlay');
+    if (overlay) {
+      overlay.classList.remove('active');
+    }
+  }
+
+  // 处理拖拽的 SVG 文件
+  handleDragDropSvg(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const rawContent = e.target.result;
+
+      if (!this.isValidSvg(rawContent)) {
+        alert(i18n.t('invalidIcon'));
+        return;
+      }
+
+      // 提取纯 SVG 代码
+      const svgCode = this.extractSvgCode(rawContent);
+
+      // 检查 SVG 大小
+      const sizeWarning = this.checkSvgSize(svgCode);
+      if (sizeWarning) {
+        alert(sizeWarning);
+        return;
+      }
+
+      // 打开添加弹窗并预填充图标
+      this.openModal();
+      this.setIconValue(svgCode);
+    };
+    reader.readAsText(file);
   }
 
   // 设置弹窗事件监听
@@ -421,11 +724,18 @@ class SpeedDial {
 
   // 导出数据
   async exportData() {
-    const data = await new Promise((resolve) => {
+    const rawData = await new Promise((resolve) => {
       chrome.storage.sync.get(null, resolve);
     });
 
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    // 将分片格式合并为简单格式，便于导入和兼容
+    const dials = await this.loadDialsFromChunks(rawData);
+    const exportData = {
+      dials: dials,
+      settings: rawData.settings || this.settings
+    };
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
 
     const a = document.createElement('a');
@@ -462,13 +772,55 @@ class SpeedDial {
   // 显示导入选项对话框
   showImportDialog(convertedDials) {
     return new Promise((resolve) => {
-      const message = `${i18n.t('speedDial2Detected')}\n\n` +
-        `• ${i18n.t('addToExisting')}\n` +
-        `• ${i18n.t('replaceAll')}`;
+      const modal = document.getElementById('importModal');
+      const countEl = document.getElementById('importCount');
+      const addBtn = document.getElementById('importAddBtn');
+      const replaceBtn = document.getElementById('importReplaceBtn');
+      const closeBtn = document.getElementById('importModalClose');
 
-      // 使用自定义对话框
-      const result = confirm(message + '\n\n' + i18n.t('addToExisting') + '? (OK=' + i18n.t('addToExisting') + ', Cancel=' + i18n.t('replaceAll') + ')');
-      resolve(result ? 'add' : 'replace');
+      // 显示导入数量
+      countEl.textContent = `${i18n.t('detectedCount').replace('{count}', convertedDials.length)}`;
+
+      // 清除之前的事件监听
+      const newAddBtn = addBtn.cloneNode(true);
+      const newReplaceBtn = replaceBtn.cloneNode(true);
+      const newCloseBtn = closeBtn.cloneNode(true);
+      addBtn.parentNode.replaceChild(newAddBtn, addBtn);
+      replaceBtn.parentNode.replaceChild(newReplaceBtn, replaceBtn);
+      closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
+
+      // 重新应用国际化
+      newAddBtn.querySelector('span').textContent = i18n.t('addToExisting');
+      newReplaceBtn.querySelector('span').textContent = i18n.t('replaceAll');
+
+      // 绑定事件
+      newAddBtn.addEventListener('click', () => {
+        modal.classList.add('hidden');
+        resolve('add');
+      });
+
+      newReplaceBtn.addEventListener('click', () => {
+        modal.classList.add('hidden');
+        resolve('replace');
+      });
+
+      newCloseBtn.addEventListener('click', () => {
+        modal.classList.add('hidden');
+        resolve(null);
+      });
+
+      // 点击背景关闭
+      const handleBackgroundClick = (e) => {
+        if (e.target === modal) {
+          modal.classList.add('hidden');
+          modal.removeEventListener('click', handleBackgroundClick);
+          resolve(null);
+        }
+      };
+      modal.addEventListener('click', handleBackgroundClick);
+
+      // 显示弹窗
+      modal.classList.remove('hidden');
     });
   }
 
@@ -486,6 +838,13 @@ class SpeedDial {
           const convertedDials = this.convertFromSpeedDial2(data);
           const action = await this.showImportDialog(convertedDials);
 
+          // 用户取消了导入
+          if (action === null) {
+            // 重置文件输入
+            document.getElementById('importFileSettings').value = '';
+            return;
+          }
+
           if (action === 'add') {
             // 追加到现有快捷方式
             this.dials = [...this.dials, ...convertedDials];
@@ -496,8 +855,8 @@ class SpeedDial {
 
           await this.saveData();
 
-          // 显示导入成功消息
-          alert(`${convertedDials.length} ${i18n.t('importedCount')}`);
+          // 显示导入成功提示
+          this.showImportSuccess(convertedDials.length);
         } else {
           // 原有格式的导入逻辑
           // 检查数据大小
@@ -565,12 +924,10 @@ class SpeedDial {
       };
 
       // 重置为默认快捷方式
-      this.dials = [
-        { name: 'Google', url: 'https://www.google.com', icon: '' },
-        { name: 'YouTube', url: 'https://www.youtube.com', icon: '' },
-        { name: 'GitHub', url: 'https://www.github.com', icon: '' },
-        { name: 'Twitter', url: 'https://www.twitter.com', icon: '' }
-      ];
+      this.dials = this.getDefaultDials();
+
+      // 保存重置后的数据（使用分片格式）
+      await this.saveData();
 
       // 应用设置
       i18n.setLanguage(this.settings.language);
@@ -583,10 +940,111 @@ class SpeedDial {
     }
   }
 
+  // 获取默认快捷方式
+  getDefaultDials() {
+    return [
+      { name: 'Google', url: 'https://www.google.com', icon: '' },
+      { name: 'YouTube', url: 'https://www.youtube.com', icon: '' },
+      { name: 'GitHub', url: 'https://www.github.com', icon: '' },
+      { name: 'Twitter', url: 'https://www.twitter.com', icon: '' }
+    ];
+  }
+
+  // 将 dials 分片保存
+  async saveDialsInChunks(dials) {
+    const CHUNK_MAX_SIZE = 7000; // 7KB，留 1KB 缓冲
+    const chunks = [];
+    let currentChunk = [];
+    let currentSize = 0;
+
+    for (const dial of dials) {
+      const itemSize = new Blob([JSON.stringify(dial)]).size;
+      if (currentSize + itemSize > CHUNK_MAX_SIZE && currentChunk.length > 0) {
+        chunks.push(currentChunk);
+        currentChunk = [];
+        currentSize = 0;
+      }
+      currentChunk.push(dial);
+      currentSize += itemSize + 1; // +1 for comma
+    }
+    if (currentChunk.length > 0) {
+      chunks.push(currentChunk);
+    }
+
+    // 构建存储对象
+    const storageData = {
+      dials_meta: { count: dials.length, chunks: chunks.length, version: 2 },
+      settings: this.settings
+    };
+    chunks.forEach((chunk, i) => {
+      storageData[`dials_${i}`] = chunk;
+    });
+
+    // 清理旧的分片和旧格式
+    await this.cleanupOldChunks(chunks.length);
+
+    return new Promise((resolve, reject) => {
+      chrome.storage.sync.set(storageData, () => {
+        if (chrome.runtime.lastError) {
+          reject(chrome.runtime.lastError);
+        } else {
+          resolve();
+        }
+      });
+    });
+  }
+
+  // 从分片加载 dials
+  async loadDialsFromChunks(result) {
+    if (!result.dials_meta) {
+      // 旧格式兼容
+      return result.dials || this.getDefaultDials();
+    }
+
+    const { chunks } = result.dials_meta;
+    const dials = [];
+    for (let i = 0; i < chunks; i++) {
+      const chunk = result[`dials_${i}`];
+      if (chunk) {
+        dials.push(...chunk);
+      }
+    }
+    return dials.length > 0 ? dials : this.getDefaultDials();
+  }
+
+  // 清理旧分片
+  async cleanupOldChunks(newChunkCount) {
+    return new Promise((resolve) => {
+      chrome.storage.sync.get(null, (result) => {
+        if (chrome.runtime.lastError) {
+          resolve();
+          return;
+        }
+
+        const keysToRemove = [];
+
+        // 删除旧格式的 dials 键
+        if (result.dials) keysToRemove.push('dials');
+
+        // 删除多余的分片（检查到 20 个）
+        for (let i = newChunkCount; i < 20; i++) {
+          if (result[`dials_${i}`]) keysToRemove.push(`dials_${i}`);
+        }
+
+        if (keysToRemove.length > 0) {
+          chrome.storage.sync.remove(keysToRemove, () => {
+            resolve();
+          });
+        } else {
+          resolve();
+        }
+      });
+    });
+  }
+
   // 检查同步状态
   async checkSyncStatus() {
     const SYNC_QUOTA_BYTES = 102400; // 100KB
-    const SYNC_QUOTA_BYTES_PER_ITEM = 8192; // 8KB
 
     // 获取同步存储使用量
     chrome.storage.sync.getBytesInUse(null, (syncBytes) => {
@@ -626,16 +1084,15 @@ class SpeedDial {
     if (syncData === null) {
       statusEl.textContent = `❌ ${i18n.t('syncAccessFailed')}`;
       statusEl.style.color = '#ff6b6b';
+    } else if (syncData.dials_meta) {
+      // 新的分片格式
+      const { count, chunks, version } = syncData.dials_meta;
+      statusEl.textContent = `✅ ${i18n.t('syncNormal')} (${count} ${i18n.t('shortcutsSynced')}, ${chunks} 分片)`;
+      statusEl.style.color = '#4CAF50';
     } else if (syncData.dials) {
-      // 检查 dials 数据大小
-      const dialsSize = new Blob([JSON.stringify(syncData.dials)]).size;
-      if (dialsSize > SYNC_QUOTA_BYTES_PER_ITEM) {
-        statusEl.textContent = `⚠️ ${i18n.t('dataTooLarge')} (${(dialsSize/1024).toFixed(1)}KB > 8KB), ${i18n.t('cannotSync')}`;
-        statusEl.style.color = '#ff9800';
-      } else {
-        statusEl.textContent = `✅ ${i18n.t('syncNormal')} (${syncData.dials.length} ${i18n.t('shortcutsSynced')})`;
-        statusEl.style.color = '#4CAF50';
-      }
+      // 旧格式 - 提示将自动迁移
+      statusEl.textContent = `✅ ${i18n.t('syncNormal')} (${syncData.dials.length} ${i18n.t('shortcutsSynced')}, 旧格式)`;
+      statusEl.style.color = '#4CAF50';
     } else {
       statusEl.textContent = `⚠️ ${i18n.t('noSyncData')}`;
       statusEl.style.color = '#ff9800';
@@ -658,12 +1115,20 @@ class SpeedDial {
       nameInput.value = dial.name;
       urlInput.value = dial.url;
       iconInput.value = dial.icon || '';
+
+      // 显示图标预览
+      if (dial.icon) {
+        this.showIconPreview(dial.icon);
+      } else {
+        this.clearIconPreview();
+      }
     } else {
       // 新增模式
       title.textContent = i18n.t('addShortcut');
       nameInput.value = '';
       urlInput.value = '';
       iconInput.value = '';
+      this.clearIconPreview();
     }
 
     modal.classList.remove('hidden');
@@ -718,16 +1183,24 @@ class SpeedDial {
   // 验证是否为有效的 SVG
   isValidSvg(str) {
     const trimmed = str.trim();
-    // 必须以 <svg 开头，以 </svg> 结尾
-    if (!trimmed.startsWith('<svg') || !trimmed.endsWith('</svg>')) {
+    // 提取 SVG 代码（可能包含 XML 声明和注释）
+    const svgMatch = trimmed.match(/<svg[\s\S]*<\/svg>/i);
+    if (!svgMatch) {
       return false;
     }
     // 基本的 XSS 防护：不允许 script 标签和事件处理器
     const dangerous = /<script|on\w+\s*=/i;
-    if (dangerous.test(trimmed)) {
+    if (dangerous.test(svgMatch[0])) {
       return false;
     }
     return true;
+  }
+
+  // 从文件内容中提取 SVG 代码
+  extractSvgCode(str) {
+    const trimmed = str.trim();
+    const svgMatch = trimmed.match(/<svg[\s\S]*<\/svg>/i);
+    return svgMatch ? svgMatch[0] : null;
   }
 
   // 删除快捷方式
@@ -764,22 +1237,55 @@ class SpeedDial {
 
   // 拖拽开始
   handleDragStart(e, index) {
+    this.dragSourceIndex = index;
     e.dataTransfer.setData('text/plain', index);
-    e.target.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+
+    // 延迟添加样式，让拖拽预览正常显示
+    requestAnimationFrame(() => {
+      e.target.classList.add('dragging');
+    });
   }
 
   // 拖拽经过
   handleDragOver(e) {
     e.preventDefault();
-    e.target.closest('.dial-item')?.classList.add('drag-over');
+    e.dataTransfer.dropEffect = 'move';
+
+    const targetItem = e.target.closest('.dial-item');
+    if (!targetItem || targetItem.classList.contains('dragging') || targetItem.classList.contains('dial-add')) {
+      return;
+    }
+
+    // 移除其他元素的 drag-over 样式
+    document.querySelectorAll('.dial-item.drag-over').forEach(el => {
+      if (el !== targetItem) {
+        el.classList.remove('drag-over');
+      }
+    });
+
+    targetItem.classList.add('drag-over');
+  }
+
+  // 拖拽离开
+  handleDragLeave(e) {
+    const targetItem = e.target.closest('.dial-item');
+    if (targetItem && !targetItem.contains(e.relatedTarget)) {
+      targetItem.classList.remove('drag-over');
+    }
   }
 
   // 放下
   async handleDrop(e, targetIndex) {
     e.preventDefault();
     const sourceIndex = parseInt(e.dataTransfer.getData('text/plain'));
-    
-    if (sourceIndex !== targetIndex) {
+
+    // 清除所有拖拽样式
+    document.querySelectorAll('.dial-item').forEach(el => {
+      el.classList.remove('dragging', 'drag-over');
+    });
+
+    if (sourceIndex !== targetIndex && !isNaN(sourceIndex)) {
       const [removed] = this.dials.splice(sourceIndex, 1);
       this.dials.splice(targetIndex, 0, removed);
       await this.saveData();
@@ -789,6 +1295,7 @@ class SpeedDial {
 
   // 拖拽结束
   handleDragEnd() {
+    this.dragSourceIndex = null;
     document.querySelectorAll('.dial-item').forEach(el => {
       el.classList.remove('dragging', 'drag-over');
     });
