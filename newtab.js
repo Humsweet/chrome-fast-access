@@ -859,29 +859,22 @@ class SpeedDial {
           this.showImportSuccess(convertedDials.length);
         } else {
           // 原有格式的导入逻辑
-          // 检查数据大小
-          const dataSize = new Blob([JSON.stringify(data)]).size;
-          if (dataSize > 102400) {
-            alert(i18n.t('importDataTooLarge'));
+          // 1. 清理 SVG 图标
+          if (data.dials && Array.isArray(data.dials)) {
+            data.dials = data.dials.map(dial => ({
+              ...dial,
+              icon: dial.icon ? this.cleanSvg(dial.icon) : ''
+            }));
           }
 
-          await new Promise((resolve) => {
-            chrome.storage.sync.set(data, () => {
-              if (chrome.runtime.lastError) {
-                // 同步失败，尝试保存到本地
-                chrome.storage.local.set(data, () => {
-                  alert(i18n.t('savedToLocal'));
-                  resolve();
-                });
-              } else {
-                // 同时保存到本地
-                chrome.storage.local.set(data, resolve);
-              }
-            });
-          });
+          // 2. 更新内存数据
+          this.dials = data.dials || this.getDefaultDials();
+          if (data.settings) {
+            this.settings = { ...this.settings, ...data.settings };
+          }
 
-          // 重新加载数据
-          await this.loadData();
+          // 3. 使用分片存储机制保存（与 saveData 一致）
+          await this.saveData();
         }
 
         // 更新设置弹窗表单
@@ -1194,6 +1187,40 @@ class SpeedDial {
       return false;
     }
     return true;
+  }
+
+  // 清理 SVG 代码，移除冗余内容
+  cleanSvg(svgString) {
+    if (!svgString || typeof svgString !== 'string') {
+      return '';
+    }
+
+    let cleaned = svgString.trim();
+
+    // 1. 移除空的 <g> 元素（包括只有空白的）
+    cleaned = cleaned.replace(/<g[^>]*>\s*<\/g>/gi, '');
+
+    // 2. 多次执行以处理嵌套的空 <g>
+    let prev;
+    do {
+      prev = cleaned;
+      cleaned = cleaned.replace(/<g[^>]*>\s*<\/g>/gi, '');
+    } while (cleaned !== prev);
+
+    // 3. 移除多余的空白和换行
+    cleaned = cleaned
+      .replace(/\r\n/g, '\n')
+      .replace(/\n\s*\n/g, '\n')
+      .replace(/\t/g, ' ')
+      .replace(/  +/g, ' ');
+
+    // 4. 移除 XML 声明（如果有）
+    cleaned = cleaned.replace(/<\?xml[^?]*\?>/gi, '');
+
+    // 5. 移除注释
+    cleaned = cleaned.replace(/<!--[\s\S]*?-->/g, '');
+
+    return cleaned.trim();
   }
 
   // 从文件内容中提取 SVG 代码

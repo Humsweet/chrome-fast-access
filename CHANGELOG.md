@@ -2,6 +2,16 @@
 
 All notable changes to fast-access will be documented in this file.
 
+## [1.5.2] - 2026-01-22
+
+### Fixed
+- Import feature now correctly uses chunked storage mechanism
+- Imported data now persists after page refresh
+
+### Added
+- SVG cleaning on import: removes empty `<g>` elements, XML declarations, comments, and redundant whitespace
+- Reduces storage size for imported SVG icons
+
 ## [1.5.1] - 2026-01-22
 
 ### Added
