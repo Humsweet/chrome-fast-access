@@ -398,15 +398,6 @@ body {
   .clock {
     font-size: 36px;
   }
-
-  .search-container {
-    margin-bottom: 20px;
-  }
-
-  #searchInput {
-    padding: 12px 16px 12px 44px;
-    font-size: 14px;
-  }
 }
 
 /* 拖拽相关样式 - Notion 风格 */

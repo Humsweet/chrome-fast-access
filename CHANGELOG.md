@@ -2,6 +2,14 @@
 
 All notable changes to fast-access will be documented in this file.
 
+## [1.5.3] - 2026-01-22
+
+### Fixed
+- Remove unused `topSites` and `favicon` permissions (Chrome Store policy compliance)
+
+### Changed
+- Clean up residual search CSS styles from removed feature
+
 ## [1.5.2] - 2026-01-22
 
 ### Fixed
