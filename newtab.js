@@ -18,16 +18,62 @@ class SpeedDial {
       iconScale: 1
     };
     this.editingIndex = null;
+    this.dataVersion = 0;
+    this.deviceId = null;
     this.init();
   }
 
   async init() {
+    await this.initDeviceId();
     await i18n.init();
     await this.loadData();
     this.applyI18n();
     this.renderDials();
     this.applySettings();
     this.setupEventListeners();
+    this.setupSyncListener();
+  }
+
+  // 生成并持久化设备标识
+  async initDeviceId() {
+    return new Promise((resolve) => {
+      chrome.storage.local.get(['deviceId'], (result) => {
+        if (result.deviceId) {
+          this.deviceId = result.deviceId;
+        } else {
+          this.deviceId = 'dev_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now().toString(36);
+          chrome.storage.local.set({ deviceId: this.deviceId });
+        }
+        resolve();
+      });
+    });
+  }
+
+  // 监听远端同步变更（实时跨设备同步）
+  setupSyncListener() {
+    chrome.storage.onChanged.addListener((changes, area) => {
+      if (area !== 'sync') return;
+      if (!changes.dials_meta) return;
+
+      const newMeta = changes.dials_meta.newValue;
+      if (!newMeta) return;
+
+      // 忽略自己的变更
+      if (newMeta.deviceId === this.deviceId) return;
+
+      if (newMeta.dataVersion > this.dataVersion) {
+        // 远端数据更新，重新加载
+        console.log(`[Sync] 远端更新: v${newMeta.dataVersion} (设备 ${newMeta.deviceId})`);
+        this.loadData().then(() => {
+          this.renderDials();
+          this.applySettings();
+        });
+      } else if (newMeta.dataVersion < this.dataVersion) {
+        // 远端数据降级（如新设备写入了默认值），重新保存本地数据以恢复
+        console.warn(`[Sync] 检测到降级: 远端 v${newMeta.dataVersion} < 本地 v${this.dataVersion}，重新保存本地数据`);
+        this.saveData();
+      }
+    });
   }
 
   // 应用国际化
@@ -76,6 +122,11 @@ class SpeedDial {
     // 支持分片格式和旧格式
     this.dials = await this.loadDialsFromChunks(result);
 
+    // 提取数据版本号
+    if (result.dials_meta && result.dials_meta.dataVersion) {
+      this.dataVersion = result.dials_meta.dataVersion;
+    }
+
     if (result.settings) {
       this.settings = { ...this.settings, ...result.settings };
     }
@@ -84,6 +135,27 @@ class SpeedDial {
   // 保存数据
   async saveData() {
     const SYNC_QUOTA_BYTES = 102400; // 100KB
+
+    // 读取远端当前状态（用于首次保存保护和冲突检测）
+    const remoteMeta = await new Promise((resolve) => {
+      chrome.storage.sync.get(['dials_meta'], (result) => {
+        if (chrome.runtime.lastError) {
+          resolve(null);
+        } else {
+          resolve(result.dials_meta || null);
+        }
+      });
+    });
+
+    // 首次保存保护：如果本地还在用默认数据（dataVersion=0），
+    // 但远端已经有其他设备的数据，则加载远端数据而非覆盖
+    if (this.dataVersion === 0 && remoteMeta && remoteMeta.dataVersion > 0) {
+      console.log('[Sync] 首次保存检测到远端数据已到达，加载远端数据而非覆盖');
+      await this.loadData();
+      this.renderDials();
+      this.applySettings();
+      return;
+    }
 
     // 估算总数据大小
     const estimatedSize = new Blob([JSON.stringify({
@@ -102,6 +174,15 @@ class SpeedDial {
     }
 
     try {
+      // 冲突检测：远端数据比本地加载时更新，说明其他设备已修改
+      if (remoteMeta && remoteMeta.dataVersion > this.dataVersion && remoteMeta.deviceId !== this.deviceId) {
+        console.warn(`[Sync] 冲突: 远端 v${remoteMeta.dataVersion} > 本地 v${this.dataVersion}，备份远端数据`);
+        await this.backupConflictData();
+      }
+
+      // 递增版本号
+      this.dataVersion++;
+
       // 使用分片存储
       await this.saveDialsInChunks(this.dials);
 
@@ -113,8 +194,10 @@ class SpeedDial {
         }, resolve);
       });
 
-      console.log('数据已分片同步保存');
+      console.log(`[Sync] 数据已保存 (v${this.dataVersion}, 设备 ${this.deviceId})`);
     } catch (error) {
+      // 保存失败，回退版本号
+      this.dataVersion--;
       console.error('同步保存失败:', error.message);
       this.showSyncWarning('同步失败: ' + error.message);
       // 回退到本地存储
@@ -123,6 +206,32 @@ class SpeedDial {
         settings: this.settings
       });
     }
+  }
+
+  // 备份冲突数据到本地存储
+  async backupConflictData() {
+    return new Promise((resolve) => {
+      chrome.storage.sync.get(null, async (result) => {
+        if (chrome.runtime.lastError) {
+          resolve();
+          return;
+        }
+        const dials = await this.loadDialsFromChunks(result);
+        chrome.storage.local.set({
+          conflict_backup: {
+            dials: dials,
+            settings: result.settings,
+            dataVersion: result.dials_meta ? result.dials_meta.dataVersion : 0,
+            deviceId: result.dials_meta ? result.dials_meta.deviceId : 'unknown',
+            timestamp: Date.now(),
+            source: 'sync_conflict'
+          }
+        }, () => {
+          console.log('[Sync] 冲突数据已备份到本地存储');
+          resolve();
+        });
+      });
+    });
   }
 
   // 仅保存到本地存储
@@ -966,7 +1075,14 @@ class SpeedDial {
 
     // 构建存储对象
     const storageData = {
-      dials_meta: { count: dials.length, chunks: chunks.length, version: 2 },
+      dials_meta: {
+        count: dials.length,
+        chunks: chunks.length,
+        version: 2,
+        dataVersion: this.dataVersion,
+        lastModified: Date.now(),
+        deviceId: this.deviceId
+      },
       settings: this.settings
     };
     chunks.forEach((chunk, i) => {
@@ -1079,8 +1195,9 @@ class SpeedDial {
       statusEl.style.color = '#ff6b6b';
     } else if (syncData.dials_meta) {
       // 新的分片格式
-      const { count, chunks, version } = syncData.dials_meta;
-      statusEl.textContent = `✅ ${i18n.t('syncNormal')} (${count} ${i18n.t('shortcutsSynced')}, ${chunks} 分片)`;
+      const { count, chunks, dataVersion } = syncData.dials_meta;
+      const versionStr = dataVersion ? `, v${dataVersion}` : '';
+      statusEl.textContent = `✅ ${i18n.t('syncNormal')} (${count} ${i18n.t('shortcutsSynced')}, ${chunks} ${i18n.t('chunks')}${versionStr})`;
       statusEl.style.color = '#4CAF50';
     } else if (syncData.dials) {
       // 旧格式 - 提示将自动迁移
