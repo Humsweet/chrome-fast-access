@@ -77,6 +77,9 @@ const i18n = {
       replaceAll: 'Replace all',
       importedCount: 'shortcuts imported',
 
+      // 同步
+      chunks: 'chunks',
+
       // 图标上传
       pasteSvgCode: 'Paste SVG Code',
       uploadSvgFile: 'Upload SVG',
@@ -86,6 +89,10 @@ const i18n = {
       dropSvgHere: 'Drop SVG file to add shortcut',
 
       // 更新日志
+      v160Changes: 'v1.6.0 Changes:',
+      v160Change1: 'Real-time cross-device sync via storage change listener',
+      v160Change2: 'Conflict detection with automatic backup protection',
+      v160Change3: 'First-install sync protection prevents overwriting existing data',
       v151Changes: 'v1.5.1 Changes:',
       v151Change1: 'Add SVG file upload feature for icons',
       v151Change2: 'Icon preview when adding/editing shortcuts',
@@ -175,6 +182,9 @@ const i18n = {
       replaceAll: '替换全部',
       importedCount: '个快捷方式已导入',
 
+      // 同步
+      chunks: '分片',
+
       // 图标上传
       pasteSvgCode: '粘贴 SVG 代码',
       uploadSvgFile: '上传 SVG',
@@ -184,6 +194,10 @@ const i18n = {
       dropSvgHere: '拖放 SVG 文件以添加快捷方式',
 
       // 更新日志
+      v160Changes: 'v1.6.0 更新内容：',
+      v160Change1: '实时跨设备同步，监听存储变更自动刷新',
+      v160Change2: '冲突检测与自动备份保护，数据不丢失',
+      v160Change3: '首次安装同步保护，防止默认值覆盖已有配置',
       v151Changes: 'v1.5.1 更新内容：',
       v151Change1: '新增上传 SVG 文件功能',
       v151Change2: '添加/编辑快捷方式时显示图标预览',
@@ -273,6 +287,9 @@ const i18n = {
       replaceAll: '取代全部',
       importedCount: '個捷徑已匯入',
 
+      // 同步
+      chunks: '分片',
+
       // 圖示上傳
       pasteSvgCode: '貼上 SVG 代碼',
       uploadSvgFile: '上傳 SVG',
@@ -282,6 +299,10 @@ const i18n = {
       dropSvgHere: '拖放 SVG 檔案以新增捷徑',
 
       // 更新日志
+      v160Changes: 'v1.6.0 更新內容：',
+      v160Change1: '即時跨裝置同步，監聽儲存變更自動刷新',
+      v160Change2: '衝突偵測與自動備份保護，資料不遺失',
+      v160Change3: '首次安裝同步保護，防止預設值覆蓋已有設定',
       v151Changes: 'v1.5.1 更新內容：',
       v151Change1: '新增上傳 SVG 檔案功能',
       v151Change2: '新增/編輯捷徑時顯示圖示預覽',
@@ -371,6 +392,9 @@ const i18n = {
       replaceAll: 'すべて置換',
       importedCount: '個のショートカットをインポートしました',
 
+      // 同期
+      chunks: 'チャンク',
+
       // アイコンアップロード
       pasteSvgCode: 'SVGコードを貼り付け',
       uploadSvgFile: 'SVGをアップロード',
@@ -380,6 +404,10 @@ const i18n = {
       dropSvgHere: 'SVGファイルをドロップしてショートカットを追加',
 
       // 更新日志
+      v160Changes: 'v1.6.0 更新内容：',
+      v160Change1: 'ストレージ変更リスナーによるリアルタイムクロスデバイス同期',
+      v160Change2: '競合検出と自動バックアップ保護',
+      v160Change3: '初回インストール時の同期保護、既存データの上書きを防止',
       v151Changes: 'v1.5.1 更新内容：',
       v151Change1: 'SVGファイルアップロード機能を追加',
       v151Change2: 'ショートカット追加/編集時にアイコンプレビューを表示',
@@ -469,6 +497,9 @@ const i18n = {
       replaceAll: 'Reemplazar todo',
       importedCount: 'accesos directos importados',
 
+      // Sincronización
+      chunks: 'fragmentos',
+
       // Carga de iconos
       pasteSvgCode: 'Pegar código SVG',
       uploadSvgFile: 'Subir SVG',
@@ -478,6 +509,10 @@ const i18n = {
       dropSvgHere: 'Suelta el archivo SVG para añadir acceso directo',
 
       // 更新日志
+      v160Changes: 'Cambios en v1.6.0:',
+      v160Change1: 'Sincronización en tiempo real entre dispositivos mediante listener de cambios',
+      v160Change2: 'Detección de conflictos con protección de respaldo automática',
+      v160Change3: 'Protección de sincronización en primera instalación, evita sobrescribir datos existentes',
       v151Changes: 'Cambios en v1.5.1:',
       v151Change1: 'Añadida función de carga de archivos SVG para iconos',
       v151Change2: 'Vista previa del icono al añadir/editar accesos directos',
