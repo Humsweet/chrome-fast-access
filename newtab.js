@@ -389,11 +389,42 @@ class SpeedDial {
     const baseMargin = 20;
     const baseFontSize = 18;
 
-    const scaledIconSize = baseIconSize * scale;
-    const scaledCardSize = baseCardSize * scale;
-    const scaledGap = baseGap * scale;
-    const scaledMargin = baseMargin * scale;
-    const scaledFontSize = baseFontSize * scale;
+    // 获取可用宽度（考虑 container padding）
+    const containerPadding = window.innerWidth <= 480 ? 24 : (window.innerWidth <= 768 ? 32 : 40);
+    const availableWidth = window.innerWidth - containerPadding;
+
+    let scaledCardSize = baseCardSize * scale;
+    let scaledGap = baseGap * scale;
+    let scaledIconSize = baseIconSize * scale;
+    let scaledMargin = baseMargin * scale;
+    let scaledFontSize = baseFontSize * scale;
+
+    // 计算当前设置下所需的宽度
+    let gridWidth = (scaledCardSize * columns) + (scaledGap * (columns - 1));
+
+    // 如果网格宽度超出可用宽度，自适应缩小
+    if (gridWidth > availableWidth) {
+      // 先尝试减少列数
+      let effectiveColumns = columns;
+      while (effectiveColumns > 1) {
+        const testWidth = (scaledCardSize * effectiveColumns) + (scaledGap * (effectiveColumns - 1));
+        if (testWidth <= availableWidth) break;
+        effectiveColumns--;
+      }
+
+      // 如果减到最少列仍然超出，则缩小卡片尺寸
+      gridWidth = (scaledCardSize * effectiveColumns) + (scaledGap * (effectiveColumns - 1));
+      if (gridWidth > availableWidth && effectiveColumns === 1) {
+        const ratio = availableWidth / gridWidth;
+        scaledCardSize = scaledCardSize * ratio;
+        scaledIconSize = scaledIconSize * ratio;
+        scaledGap = scaledGap * ratio;
+        scaledMargin = scaledMargin * ratio;
+        scaledFontSize = scaledFontSize * ratio;
+      }
+
+      gridWidth = (scaledCardSize * effectiveColumns) + (scaledGap * (effectiveColumns - 1));
+    }
 
     document.documentElement.style.setProperty('--icon-size', `${scaledIconSize}px`);
     document.documentElement.style.setProperty('--card-size', `${scaledCardSize}px`);
@@ -402,7 +433,6 @@ class SpeedDial {
     document.documentElement.style.setProperty('--font-size', `${scaledFontSize}px`);
 
     // 计算网格宽度以控制每行数量
-    const gridWidth = (scaledCardSize * columns) + (scaledGap * (columns - 1));
     grid.style.width = `${gridWidth}px`;
     grid.style.maxWidth = '100%';
   }
@@ -435,6 +465,13 @@ class SpeedDial {
 
     // 设置弹窗相关
     this.setupSettingsModalListeners();
+
+    // 窗口大小变化时重新计算布局
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => this.applySettings(), 150);
+    });
 
     // 键盘快捷键
     document.addEventListener('keydown', (e) => {
