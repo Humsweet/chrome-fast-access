@@ -18,9 +18,8 @@ const includeFiles = [
   'newtab.html',
   'newtab.css',
   'newtab.js',
-  'options.html',
-  'options.css',
-  'options.js'
+  'i18n.js',
+  'background.js'
 ];
 
 const includeFolders = [

@@ -8,7 +8,7 @@ fast-access 是一个 Chrome 浏览器扩展，替代默认的新标签页，提
 
 **设计风格**: Notion 风格（浅色背景、圆角、细微阴影、简洁排版）
 
-**当前版本**: v1.5.1
+**当前版本**: v1.6.1
 
 ---
 
@@ -157,6 +157,7 @@ fast-access 是一个 Chrome 浏览器扩展，替代默认的新标签页，提
 ```
 chrome-fast-access/
 ├── manifest.json      # Chrome 扩展配置
+├── background.js      # Service Worker（处理工具栏图标点击）
 ├── newtab.html        # 新标签页 HTML
 ├── newtab.css         # 样式文件
 ├── newtab.js          # 主逻辑（SpeedDial 类）
@@ -190,6 +191,17 @@ chrome-fast-access/
 ---
 
 ## 版本历史
+
+### v1.6.1 (2026-02-22)
+**修复**:
+- 添加 background service worker 处理工具栏图标点击事件
+- 点击扩展图标后打开新标签页（之前无任何响应）
+- 修复 Chrome Web Store 审核拒绝问题："New tab" 功能现在可通过工具栏图标正常触发
+- 更新 action default_title 为 "Open New Tab"
+
+**技术细节**:
+- 新增 `background.js`：注册 `chrome.action.onClicked` 监听器
+- manifest.json 添加 `background.service_worker` 配置
 
 ### v1.5.1 (2026-01-22)
 **新功能**:

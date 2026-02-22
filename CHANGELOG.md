@@ -2,6 +2,13 @@
 
 All notable changes to fast-access will be documented in this file.
 
+## [1.6.1] - 2026-02-22
+
+### Fixed
+- Add background service worker to handle toolbar icon click (opens new tab)
+- Fix Chrome Web Store rejection: "New tab" functionality now accessible via toolbar icon
+- Change action default_title from "fast-access Settings" to "Open New Tab"
+
 ## [1.5.3] - 2026-01-22
 
 ### Fixed

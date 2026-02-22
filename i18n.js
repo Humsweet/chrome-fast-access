@@ -89,6 +89,9 @@ const i18n = {
       dropSvgHere: 'Drop SVG file to add shortcut',
 
       // 更新日志
+      v161Changes: 'v1.6.1 Changes:',
+      v161Change1: 'Clicking toolbar icon now opens a new tab',
+      v161Change2: 'Added background service worker for action handling',
       v160Changes: 'v1.6.0 Changes:',
       v160Change1: 'Real-time cross-device sync via storage change listener',
       v160Change2: 'Conflict detection with automatic backup protection',
@@ -194,6 +197,9 @@ const i18n = {
       dropSvgHere: '拖放 SVG 文件以添加快捷方式',
 
       // 更新日志
+      v161Changes: 'v1.6.1 更新内容：',
+      v161Change1: '点击工具栏图标现在会打开新标签页',
+      v161Change2: '添加后台 Service Worker 处理图标点击事件',
       v160Changes: 'v1.6.0 更新内容：',
       v160Change1: '实时跨设备同步，监听存储变更自动刷新',
       v160Change2: '冲突检测与自动备份保护，数据不丢失',
@@ -299,6 +305,9 @@ const i18n = {
       dropSvgHere: '拖放 SVG 檔案以新增捷徑',
 
       // 更新日志
+      v161Changes: 'v1.6.1 更新內容：',
+      v161Change1: '點擊工具列圖示現在會開啟新分頁',
+      v161Change2: '新增背景 Service Worker 處理圖示點擊事件',
       v160Changes: 'v1.6.0 更新內容：',
       v160Change1: '即時跨裝置同步，監聽儲存變更自動刷新',
       v160Change2: '衝突偵測與自動備份保護，資料不遺失',
@@ -404,6 +413,9 @@ const i18n = {
       dropSvgHere: 'SVGファイルをドロップしてショートカットを追加',
 
       // 更新日志
+      v161Changes: 'v1.6.1 更新内容：',
+      v161Change1: 'ツールバーアイコンのクリックで新しいタブを開くように変更',
+      v161Change2: 'アクション処理用のバックグラウンドService Workerを追加',
       v160Changes: 'v1.6.0 更新内容：',
       v160Change1: 'ストレージ変更リスナーによるリアルタイムクロスデバイス同期',
       v160Change2: '競合検出と自動バックアップ保護',
@@ -509,6 +521,9 @@ const i18n = {
       dropSvgHere: 'Suelta el archivo SVG para añadir acceso directo',
 
       // 更新日志
+      v161Changes: 'Cambios en v1.6.1:',
+      v161Change1: 'Al hacer clic en el icono de la barra de herramientas ahora se abre una nueva pestaña',
+      v161Change2: 'Se añadió un Service Worker en segundo plano para manejar la acción',
       v160Changes: 'Cambios en v1.6.0:',
       v160Change1: 'Sincronización en tiempo real entre dispositivos mediante listener de cambios',
       v160Change2: 'Detección de conflictos con protección de respaldo automática',
